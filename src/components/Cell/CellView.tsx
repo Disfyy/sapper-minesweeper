@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import type { Cell, GameStatus } from '../../game/types'
+import { useLanguage } from '../../i18n/languageContext'
+import type { TranslationKey } from '../../i18n/translations'
 import styles from './CellView.module.css'
 
 function numberClass(n: number): string {
@@ -14,17 +16,25 @@ function numberClass(n: number): string {
   return ''
 }
 
-function ariaLabelFor(cell: Cell, gameStatus: GameStatus): string {
-  const base = `Row ${cell.row + 1}, column ${cell.col + 1}`
-  if (cell.state === 'flagged') return `${base}, flagged`
+function joinCellLabel(base: string, detail: string): string {
+  return `${base}, ${detail}`
+}
+
+function ariaLabelFor(
+  cell: Cell,
+  gameStatus: GameStatus,
+  t: (key: TranslationKey, vars?: Record<string, string | number>) => string,
+): string {
+  const base = t('cellPosition', { row: cell.row + 1, col: cell.col + 1 })
+  if (cell.state === 'flagged') return joinCellLabel(base, t('cellFlagged'))
 
   const revealOnEnd = gameStatus === 'lost' || gameStatus === 'won'
-  if (cell.state === 'covered' && revealOnEnd && cell.isMine) return `${base}, mine`
-  if (cell.state === 'covered') return `${base}, covered`
+  if (cell.state === 'covered' && revealOnEnd && cell.isMine) return joinCellLabel(base, t('cellMine'))
+  if (cell.state === 'covered') return joinCellLabel(base, t('cellCovered'))
 
-  if (cell.isMine) return `${base}, mine`
-  if (cell.adjacentMines === 0) return `${base}, empty`
-  return `${base}, ${cell.adjacentMines} adjacent mines`
+  if (cell.isMine) return joinCellLabel(base, t('cellMine'))
+  if (cell.adjacentMines === 0) return joinCellLabel(base, t('cellEmpty'))
+  return joinCellLabel(base, t('cellAdjacentMines', { count: cell.adjacentMines }))
 }
 
 export function CellView(props: {
@@ -39,6 +49,7 @@ export function CellView(props: {
   onToggleFlag: () => void
   onChord?: () => void
 }) {
+  const { t } = useLanguage()
   const { cell, flagMode, hint } = props
   const revealOnEnd = props.gameStatus === 'lost' || props.gameStatus === 'won'
   const longPressTimerRef = useRef<number | null>(null)
@@ -119,7 +130,7 @@ export function CellView(props: {
       onContextMenu={onContextMenu}
       onFocus={props.onFocus}
       tabIndex={props.tabIndex}
-      aria-label={ariaLabelFor(cell, props.gameStatus)}
+      aria-label={ariaLabelFor(cell, props.gameStatus, t)}
       style={{ '--r': cell.row, '--c': cell.col } as React.CSSProperties}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUpCancel}

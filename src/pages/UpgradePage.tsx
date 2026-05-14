@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { startProCheckout } from '../api/client'
 import { useAuth } from '../auth/useAuth'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import { Button } from '../ui/Button/Button'
 import styles from './Pages.module.css'
 

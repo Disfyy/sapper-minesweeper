@@ -1,8 +1,8 @@
-import { useEffect, useState, type FormEventHandler } from 'react'
+import { useState, type FormEventHandler } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { confirmProCheckout } from '../api/client'
 import { useAuth } from '../auth/useAuth'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import { Button } from '../ui/Button/Button'
 import styles from './Pages.module.css'
 
@@ -31,11 +31,7 @@ export function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!sessionId) {
-      setErr(t('missingCheckout'))
-    }
-  }, [sessionId, t])
+  const checkoutError = err ?? (!sessionId ? t('missingCheckout') : null)
 
   if (authLoading) return <div className={styles.centered}>{t('loading')}</div>
   if (!user) {
@@ -128,7 +124,7 @@ export function CheckoutPage() {
           <span>$4.99 USD</span>
         </div>
 
-        {err && <p className={styles.error}>{err}</p>}
+        {checkoutError && <p className={styles.error}>{checkoutError}</p>}
 
         <Button
           type="submit"

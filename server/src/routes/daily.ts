@@ -92,7 +92,7 @@ const SubmitSchema = z
 
 export async function registerDailyRoutes(app: FastifyInstance) {
   // Today's challenge metadata + whether the current user has played.
-  app.get('/api/daily/today', async (req, reply) => {
+  app.get('/api/daily/today', async (req) => {
     const user = await getUserFromRequest(req)
     const dateISO = todayUtcISODate()
     const daily = await getOrCreateDaily(dateISO)
@@ -127,7 +127,7 @@ export async function registerDailyRoutes(app: FastifyInstance) {
   // Top scores for a given UTC date.
   app.get<{ Querystring: { date?: string } }>(
     '/api/daily/leaderboard',
-    async (req, reply) => {
+    async (req) => {
       const dateISO = req.query.date && isISODate(req.query.date) ? req.query.date : todayUtcISODate()
 
       const r = await pool.query<{

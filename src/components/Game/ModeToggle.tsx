@@ -1,4 +1,4 @@
-import { useLanguage } from '../../i18n/LanguageProvider'
+import { useLanguage } from '../../i18n/languageContext'
 import styles from './ModeToggle.module.css'
 
 export function ModeToggle(props: { flagMode: boolean; onChange: (v: boolean) => void }) {

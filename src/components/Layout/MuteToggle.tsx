@@ -1,5 +1,5 @@
 import { useMuted } from '../../audio/playSound'
-import { useLanguage } from '../../i18n/LanguageProvider'
+import { useLanguage } from '../../i18n/languageContext'
 import styles from './ThemeToggle.module.css'
 
 export function MuteToggle() {
