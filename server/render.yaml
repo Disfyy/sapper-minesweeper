@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: minesweeper-api
+    runtime: node
+    rootDir: server
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /api/health

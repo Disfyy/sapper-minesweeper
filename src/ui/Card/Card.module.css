@@ -1,0 +1,44 @@
+.card {
+  border-radius: 14px;
+  border: 1px solid var(--stat-border);
+  background: var(--stat-bg);
+  color: var(--page-fg);
+  box-shadow: var(--stat-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.padded {
+  padding: 18px;
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.titles {
+  min-width: 0;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.005em;
+}
+
+.subtitle {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--page-fg-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}

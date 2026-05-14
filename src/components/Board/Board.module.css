@@ -1,0 +1,64 @@
+.wrap {
+  border: 1px solid var(--board-border);
+  border-radius: 18px;
+  padding: 14px;
+  background: var(--board-bg);
+  box-shadow: var(--board-shadow);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.inner {
+  display: inline-block;
+  min-width: min(100%, calc(var(--cols, 9) * 44px));
+  max-width: calc(var(--cols, 9) * 52px);
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  gap: var(--grid-gap);
+  align-items: stretch;
+  grid-template-columns: repeat(var(--cols, 9), minmax(28px, 1fr));
+}
+
+.cascade > * {
+  animation: cellPop 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc((var(--r, 0) + var(--c, 0)) * 28ms);
+}
+
+@keyframes cellPop {
+  0% {
+    transform: scale(0.6) translateY(8px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.06) translateY(-2px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 520px) {
+  .wrap {
+    padding: 10px;
+    border-radius: 14px;
+  }
+  .inner {
+    min-width: min(100%, calc(var(--cols, 9) * 36px));
+    max-width: calc(var(--cols, 9) * 44px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cascade > * {
+    animation: none;
+  }
+}

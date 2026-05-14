@@ -1,0 +1,44 @@
+@import './theme/tokens.css';
+
+:root {
+  font-family:
+    'Inter Variable',
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+body {
+  background: var(--page-bg);
+  background-attachment: fixed;
+  color: var(--page-fg);
+  transition:
+    background-color 240ms ease,
+    color 240ms ease;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font: inherit;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--page-fg);
+}

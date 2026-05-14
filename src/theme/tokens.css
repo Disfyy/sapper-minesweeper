@@ -1,0 +1,191 @@
+/* Base theme tokens — light + dark. Accents below override only --accent / focus / page gradient. */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --page-bg-base: linear-gradient(180deg, #0a0e17, #0b0f19 60%, #0a0d14);
+  --page-bg-accent:
+    radial-gradient(1200px 600px at 18% -10%, rgba(99, 102, 241, 0.18), transparent 70%),
+    radial-gradient(900px 500px at 82% -10%, rgba(16, 185, 129, 0.12), transparent 70%);
+  --page-bg: var(--page-bg-accent), var(--page-bg-base);
+
+  --page-fg: #e7eaf0;
+  --page-fg-muted: rgba(231, 234, 240, 0.75);
+  --page-fg-dim: rgba(231, 234, 240, 0.55);
+
+  --surface-0: #0b0f19;
+  --surface-1: rgba(255, 255, 255, 0.05);
+  --surface-2: rgba(255, 255, 255, 0.09);
+  --surface-3: rgba(255, 255, 255, 0.14);
+
+  --nav-bg: rgba(8, 10, 18, 0.65);
+  --nav-border: rgba(255, 255, 255, 0.08);
+
+  --stat-border: rgba(255, 255, 255, 0.12);
+  --stat-bg: rgba(255, 255, 255, 0.05);
+  --stat-shadow: 0 8px 24px -16px rgba(0, 0, 0, 0.6);
+
+  --btn-border: rgba(255, 255, 255, 0.16);
+  --btn-bg: rgba(255, 255, 255, 0.08);
+  --btn-bg-hover: rgba(255, 255, 255, 0.13);
+  --btn-fg: var(--page-fg);
+
+  --board-border: rgba(255, 255, 255, 0.12);
+  --board-bg: rgba(255, 255, 255, 0.04);
+  --board-shadow: 0 20px 60px -30px rgba(0, 0, 0, 0.7);
+  --grid-gap: 6px;
+
+  --cell-border: rgba(255, 255, 255, 0.14);
+  --cell-covered-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+  --cell-covered-hover: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  --cell-revealed-bg: rgba(0, 0, 0, 0.22);
+  --cell-revealed-border: rgba(255, 255, 255, 0.06);
+  --cell-text: #e7eaf0;
+  --cell-shadow: rgba(0, 0, 0, 0.4) 0 6px 14px -10px;
+  --cell-inset-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+
+  --exploded-bg: rgba(239, 68, 68, 0.32);
+  --exploded-border: rgba(239, 68, 68, 0.6);
+
+  --banner-win-bg: rgba(34, 197, 94, 0.14);
+  --banner-win-border: rgba(34, 197, 94, 0.45);
+  --banner-loss-bg: rgba(239, 68, 68, 0.14);
+  --banner-loss-border: rgba(239, 68, 68, 0.45);
+
+  --accent: #818cf8;
+  --accent-strong: #6366f1;
+  --accent-soft: rgba(129, 140, 248, 0.18);
+  --accent-fg: #ffffff;
+  --focus-ring: rgba(129, 140, 248, 0.85);
+
+  --n1: #60a5fa;
+  --n2: #34d399;
+  --n3: #f87171;
+  --n4: #a78bfa;
+  --n5: #fb923c;
+  --n6: #22d3ee;
+  --n7: #e5e7eb;
+  --n8: #9ca3af;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --page-bg-base: linear-gradient(180deg, #fbf9f4, #f0ece3);
+  --page-bg-accent:
+    radial-gradient(1200px 600px at 18% -10%, rgba(99, 102, 241, 0.14), transparent 70%),
+    radial-gradient(900px 500px at 82% -10%, rgba(16, 185, 129, 0.1), transparent 70%);
+  --page-bg: var(--page-bg-accent), var(--page-bg-base);
+
+  --page-fg: #161a22;
+  --page-fg-muted: rgba(22, 26, 34, 0.7);
+  --page-fg-dim: rgba(22, 26, 34, 0.55);
+
+  --surface-0: #ffffff;
+  --surface-1: rgba(255, 255, 255, 0.78);
+  --surface-2: rgba(255, 255, 255, 0.92);
+  --surface-3: #ffffff;
+
+  --nav-bg: rgba(255, 255, 255, 0.75);
+  --nav-border: rgba(22, 26, 34, 0.08);
+
+  --stat-border: rgba(22, 26, 34, 0.1);
+  --stat-bg: rgba(255, 255, 255, 0.78);
+  --stat-shadow: 0 6px 18px -14px rgba(22, 26, 34, 0.35);
+
+  --btn-border: rgba(22, 26, 34, 0.14);
+  --btn-bg: rgba(255, 255, 255, 0.7);
+  --btn-bg-hover: rgba(255, 255, 255, 0.95);
+  --btn-fg: var(--page-fg);
+
+  --board-border: rgba(22, 26, 34, 0.12);
+  --board-bg: rgba(255, 255, 255, 0.6);
+  --board-shadow: 0 16px 48px -30px rgba(22, 26, 34, 0.45);
+  --grid-gap: 6px;
+
+  --cell-border: rgba(22, 26, 34, 0.14);
+  --cell-covered-bg: linear-gradient(180deg, #ffffff, #f1f0ec);
+  --cell-covered-hover: linear-gradient(180deg, #ffffff, #fffaf0);
+  --cell-revealed-bg: rgba(22, 26, 34, 0.05);
+  --cell-revealed-border: rgba(22, 26, 34, 0.08);
+  --cell-text: #161a22;
+  --cell-shadow: rgba(22, 26, 34, 0.18) 0 6px 14px -10px;
+  --cell-inset-shadow: inset 0 -2px 0 rgba(22, 26, 34, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+
+  --exploded-bg: rgba(239, 68, 68, 0.22);
+  --exploded-border: rgba(239, 68, 68, 0.55);
+
+  --banner-win-bg: rgba(34, 197, 94, 0.16);
+  --banner-win-border: rgba(34, 197, 94, 0.45);
+  --banner-loss-bg: rgba(239, 68, 68, 0.14);
+  --banner-loss-border: rgba(239, 68, 68, 0.45);
+
+  --accent: #4f46e5;
+  --accent-strong: #4338ca;
+  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent-fg: #ffffff;
+  --focus-ring: rgba(79, 70, 229, 0.7);
+
+  --n1: #1d4ed8;
+  --n2: #047857;
+  --n3: #b91c1c;
+  --n4: #6d28d9;
+  --n5: #c2410c;
+  --n6: #0e7490;
+  --n7: #14181f;
+  --n8: #4b5563;
+}
+
+/* === ACCENTS — overlay on either base. Override only accent + page gradient. === */
+
+:root[data-accent='ocean'] {
+  --accent: #38bdf8;
+  --accent-strong: #0284c7;
+  --accent-soft: rgba(56, 189, 248, 0.18);
+  --focus-ring: rgba(56, 189, 248, 0.85);
+  --page-bg-accent:
+    radial-gradient(1000px 500px at 12% -10%, rgba(56, 189, 248, 0.22), transparent 70%),
+    radial-gradient(900px 500px at 85% -10%, rgba(14, 165, 233, 0.16), transparent 70%);
+}
+
+:root[data-accent='forest'] {
+  --accent: #4ade80;
+  --accent-strong: #16a34a;
+  --accent-soft: rgba(74, 222, 128, 0.18);
+  --focus-ring: rgba(74, 222, 128, 0.85);
+  --page-bg-accent:
+    radial-gradient(900px 480px at 82% -10%, rgba(34, 197, 94, 0.22), transparent 70%),
+    radial-gradient(700px 400px at 18% -10%, rgba(16, 185, 129, 0.14), transparent 70%);
+}
+
+:root[data-accent='neon'] {
+  --accent: #e879f9;
+  --accent-strong: #c026d3;
+  --accent-soft: rgba(232, 121, 249, 0.2);
+  --focus-ring: rgba(232, 121, 249, 0.9);
+  --page-bg-accent:
+    radial-gradient(800px 400px at 50% -10%, rgba(217, 70, 239, 0.24), transparent 70%),
+    radial-gradient(1100px 500px at 80% -10%, rgba(124, 58, 237, 0.18), transparent 70%);
+}
+
+:root[data-accent='aurora'] {
+  --accent: #60a5fa;
+  --accent-strong: #2563eb;
+  --accent-soft: rgba(96, 165, 250, 0.18);
+  --focus-ring: rgba(96, 165, 250, 0.85);
+  --page-bg-accent:
+    radial-gradient(900px 500px at 15% -10%, rgba(99, 102, 241, 0.28), transparent 70%),
+    radial-gradient(900px 500px at 80% -10%, rgba(45, 212, 191, 0.22), transparent 70%),
+    radial-gradient(700px 400px at 50% 105%, rgba(244, 114, 182, 0.16), transparent 70%);
+}
+
+:root[data-accent='sunset'] {
+  --accent: #fb923c;
+  --accent-strong: #c2410c;
+  --accent-soft: rgba(251, 146, 60, 0.18);
+  --focus-ring: rgba(251, 146, 60, 0.85);
+  --page-bg-accent:
+    radial-gradient(900px 500px at 10% -10%, rgba(251, 113, 133, 0.26), transparent 70%),
+    radial-gradient(1000px 500px at 80% 10%, rgba(251, 191, 36, 0.22), transparent 70%);
+}
