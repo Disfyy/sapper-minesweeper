@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import heroImg from '../assets/hero.png'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import { Button } from '../ui/Button/Button'
 import { Card } from '../ui/Card/Card'
 import { Hero } from '../ui/Hero/Hero'

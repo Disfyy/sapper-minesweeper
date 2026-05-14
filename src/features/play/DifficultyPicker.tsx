@@ -6,7 +6,7 @@ import {
   SPEED_DIFFICULTY,
   type Difficulty,
 } from '../../game/types'
-import { useLanguage } from '../../i18n/LanguageProvider'
+import { useLanguage } from '../../i18n/languageContext'
 import type { TranslationKey } from '../../i18n/translations'
 import { Button } from '../../ui/Button/Button'
 import { Card } from '../../ui/Card/Card'

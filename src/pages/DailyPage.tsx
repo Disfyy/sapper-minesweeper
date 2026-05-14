@@ -11,7 +11,7 @@ import {
 } from '../api/client'
 import { useAuth } from '../auth/useAuth'
 import { Game } from '../components/Game/Game'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import { Button } from '../ui/Button/Button'
 import styles from './Pages.module.css'
 
@@ -62,8 +62,18 @@ export function DailyPage() {
   }, [])
 
   useEffect(() => {
-    void reloadLeaderboard()
-  }, [reloadLeaderboard])
+    let alive = true
+    void getDailyLeaderboard()
+      .then((lb) => {
+        if (alive) setLeaderboard(lb.items)
+      })
+      .catch(() => {
+        /* non-fatal */
+      })
+    return () => {
+      alive = false
+    }
+  }, [])
 
   const submitOverride = useCallback(
     async (input: SubmitGameInput): Promise<SubmitGameResult> => {

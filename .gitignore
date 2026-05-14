@@ -13,6 +13,9 @@ dist-ssr
 *.local
 *.tsbuildinfo
 
+# Claude Code session state
+.claude/
+
 # Environment files (contain secrets — never commit)
 .env
 .env.*

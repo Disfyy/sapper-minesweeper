@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
-import { useLanguage } from '../../i18n/LanguageProvider'
+import { useLanguage } from '../../i18n/languageContext'
 import type { TranslationKey } from '../../i18n/translations'
 import { normalizeAccent, useTheme } from '../../theme/themeContext'
 import { Button } from '../../ui/Button/Button'
@@ -33,7 +33,7 @@ export function Layout() {
 
   return (
     <div className={styles.shell}>
-      <nav className={styles.nav} aria-label="Main">
+      <nav className={styles.nav} aria-label={t('mainNavigation')}>
         <Link className={styles.brand} to="/">
           <span className={styles.brandMark} aria-hidden="true">
             💣

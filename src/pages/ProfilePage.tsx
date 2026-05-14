@@ -8,7 +8,7 @@ import {
   type UserStats,
 } from '../api/client'
 import { useAuth } from '../auth/useAuth'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import { Button } from '../ui/Button/Button'
 import { Card } from '../ui/Card/Card'
 import styles from './Pages.module.css'

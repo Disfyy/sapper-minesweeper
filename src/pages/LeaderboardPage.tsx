@@ -4,7 +4,7 @@ import {
   type LeaderboardDifficulty,
   type LeaderboardEntry,
 } from '../api/client'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import type { TranslationKey } from '../i18n/translations'
 import { Button } from '../ui/Button/Button'
 import styles from './Leaderboard.module.css'

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { CoachHint } from '../../game/coach'
 import type { Cell, GameStatus } from '../../game/types'
+import { useLanguage } from '../../i18n/languageContext'
 import { CellView } from '../Cell/CellView'
 import styles from './Board.module.css'
 
@@ -17,6 +18,7 @@ export function Board(props: {
   onToggleFlag: (cell: Cell) => void
   onChord?: (cell: Cell) => void
 }) {
+  const { t } = useLanguage()
   const rows = props.board.length
   const cols = props.board[0]?.length ?? 0
   const gridRef = useRef<HTMLDivElement | null>(null)
@@ -67,7 +69,7 @@ export function Board(props: {
   const gridClass = `${styles.grid} ${props.status === 'won' ? styles.cascade : ''}`
 
   return (
-    <div className={styles.wrap} onKeyDown={onKeyDown} aria-label="Minesweeper board">
+    <div className={styles.wrap} onKeyDown={onKeyDown} aria-label={t('minesweeperBoard')}>
       <div className={styles.inner} style={{ '--cols': cols } as React.CSSProperties}>
         <div
           ref={gridRef}

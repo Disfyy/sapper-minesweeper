@@ -1,4 +1,4 @@
-import { useLanguage } from '../../i18n/LanguageProvider'
+import { useLanguage } from '../../i18n/languageContext'
 import { LANGUAGE_OPTIONS } from '../../i18n/translations'
 import styles from './ThemeToggle.module.css'
 

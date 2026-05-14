@@ -4,7 +4,7 @@ import { useAuth } from '../auth/useAuth'
 import { Game } from '../components/Game/Game'
 import { DifficultyPicker } from '../features/play/DifficultyPicker'
 import { DIFFICULTY_PRESETS, type Difficulty } from '../game/types'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import { getThemeStyle } from '../themes/presets'
 import styles from './Pages.module.css'
 

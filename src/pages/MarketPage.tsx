@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { equipTheme, getMarketThemes, purchaseTheme, type MarketTheme } from '../api/client'
 import { useAuth } from '../auth/useAuth'
-import { useLanguage } from '../i18n/LanguageProvider'
+import { useLanguage } from '../i18n/languageContext'
 import styles from './Pages.module.css'
 
 export function MarketPage() {
@@ -59,11 +59,11 @@ export function MarketPage() {
     )
   }
 
-  async function buy(t: MarketTheme) {
-    setBusyId(t.id)
+  async function buy(theme: MarketTheme) {
+    setBusyId(theme.id)
     setErr(null)
     try {
-      await purchaseTheme(t.id)
+      await purchaseTheme(theme.id)
       await refresh()
       await load()
     } catch (e) {
@@ -73,11 +73,11 @@ export function MarketPage() {
     }
   }
 
-  async function equip(t: MarketTheme) {
-    setBusyId(t.id)
+  async function equip(theme: MarketTheme) {
+    setBusyId(theme.id)
     setErr(null)
     try {
-      await equipTheme(t.id)
+      await equipTheme(theme.id)
       await refresh()
       await load()
     } catch (e) {
