@@ -4,8 +4,23 @@ A modern web platform for Minesweeper that turns a 35-year-old single-player gam
 
 > Think **chess.com for Minesweeper**: instant play, daily challenges with a global leaderboard, an AI coach that explains why a cell is safe, and a cosmetic economy on top.
 
-**Live demo:** Deploy frontend on [Vercel](https://vercel.com) (`VITE_API_URL` → Render API URL) and API+DB via [Render Blueprint](https://dashboard.render.com) using root `render.yaml`.
+**Live demo (play here):** https://sapper-minesweeper.vercel.app  
+**API health check:** https://sapper-api-b31h.onrender.com/api/health  
 **Repo:** https://github.com/Disfyy/sapper-minesweeper
+
+### Quick tour for judges
+
+| Step | What to try |
+|------|-------------|
+| 1 | Open the **live demo** → **Play now** (guest play works) |
+| 2 | **Sign up** with a unique **username** (required; one per account) |
+| 3 | **Daily** — shared board, global leaderboard |
+| 4 | **Duel** (after login) — create a room, share code, 1v1 real-time race |
+| 5 | **Shop** / **Profile** — coins, themes, stats |
+
+> **Note:** The API runs on Render’s free tier — first request after idle can take ~30s. Refresh if something doesn’t load.
+
+**Stack:** React + Vite (Vercel) · Fastify + PostgreSQL (Render) · see `render.yaml` and `DEPLOY.md` to redeploy.
 
 ---
 
@@ -43,7 +58,8 @@ Solo Minesweeper is a solved game from the user's side: you either know the tric
 | Difficulty | Beginner (9×9), Intermediate (16×16), Expert (16×30), Speed (2-min), Custom |
 | Coach | Mine-probability solver with natural-language reasoning ("safe — neighbor (2,2) shows 1 and that mine is already flagged") |
 | Daily | UTC-rotating seed, one ranked attempt per user per day |
-| Auth | Email + password, JWT in HttpOnly cookie, guest play supported |
+| Auth | Email + password, unique username, JWT (Bearer token + cookie), guest play supported |
+| Duel (1v1) | Private rooms, shareable code, real-time race on identical seeded boards (WebSocket) |
 | Persistence | PostgreSQL — every move saved, replayable in the Analysis page |
 | Leaderboard | Per-difficulty, global or city-filtered |
 | Economy | Coins on win (capped daily), theme shop, Pro tier |
@@ -84,7 +100,7 @@ npm run db:migrate
 
 # 4. run frontend + backend in two terminals
 npm run dev           # frontend on http://localhost:5173
-npm run dev:server    # backend on http://localhost:3000
+npm run dev:server    # backend on http://localhost:3001
 ```
 
 ## Project layout
@@ -112,7 +128,7 @@ server/
 Things explicitly out of scope for this submission but mapped out:
 
 - Real Stripe Checkout (currently a demo form on the same domain)
-- Real-time multiplayer races (server-issued seed exists; sockets do not)
+- Public matchmaking (private duel rooms ship today)
 - Friend graph + invite links
 - Theme-creator (user-uploaded palettes)
 
