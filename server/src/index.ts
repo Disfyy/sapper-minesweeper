@@ -13,6 +13,7 @@ import { grantDefaultCosmetics, registerMarketRoutes } from './routes/market.js'
 import {
   getUserFromRequest,
   normalizeCity,
+  normalizeUsername,
   WIN_COINS,
   WIN_DAILY_CAP,
   WIN_MIN_INTERVAL_MS,
@@ -63,11 +64,13 @@ app.get('/', async () => ({
 }))
 
 app.post<{
-  Body: { email?: string; password?: string; displayName?: string; city?: string }
+  Body: { email?: string; password?: string; username?: string; displayName?: string; city?: string }
 }>('/api/auth/register', async (req, reply) => {
   const email = req.body?.email?.trim().toLowerCase()
   const password = req.body?.password ?? ''
-  const displayName = req.body?.displayName?.trim() || null
+  const rawHandle = (req.body?.username ?? req.body?.displayName ?? '').trim()
+  const username = normalizeUsername(rawHandle)
+  const displayName = rawHandle.slice(0, 64) || null
   const city = normalizeCity(req.body?.city)
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -75,6 +78,23 @@ app.post<{
   }
   if (password.length < 8) {
     return reply.status(400).send({ error: 'Password must be at least 8 characters' })
+  }
+  if (!username) {
+    return reply.status(400).send({
+      error: 'Username must be 3–20 characters (letters, numbers, underscore)',
+    })
+  }
+
+  const existing = await pool.query<{ email: string; username: string | null }>(
+    `SELECT email, username FROM users WHERE email = $1 OR username = $2 LIMIT 1`,
+    [email, username],
+  )
+  const taken = existing.rows[0]
+  if (taken) {
+    if (taken.email === email) {
+      return reply.status(409).send({ error: 'Email already registered' })
+    }
+    return reply.status(409).send({ error: 'Username already taken' })
   }
 
   const hash = await bcrypt.hash(password, 12)
@@ -90,15 +110,18 @@ app.post<{
   let userId: string
   try {
     const ins = await pool.query<{ id: string }>(
-      `INSERT INTO users (email, password_hash, display_name, city, coins, equipped_theme_id)
-       VALUES ($1, $2, $3, $4, 500, $5)
+      `INSERT INTO users (email, password_hash, username, display_name, city, coins, equipped_theme_id)
+       VALUES ($1, $2, $3, $4, $5, 500, $6)
        RETURNING id`,
-      [email, hash, displayName, city, defaultThemeId],
+      [email, hash, username, displayName, city, defaultThemeId],
     )
     userId = ins.rows[0]!.id
   } catch (e: unknown) {
-    const err = e as { code?: string }
+    const err = e as { code?: string; constraint?: string }
     if (err.code === '23505') {
+      if (err.constraint?.includes('username')) {
+        return reply.status(409).send({ error: 'Username already taken' })
+      }
       return reply.status(409).send({ error: 'Email already registered' })
     }
     throw e
@@ -156,6 +179,7 @@ app.get('/api/me', async (req, reply) => {
 
   return {
     email: user.email,
+    username: user.username,
     displayName: user.display_name,
     city: user.city,
     coins: user.coins,

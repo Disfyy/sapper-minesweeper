@@ -64,7 +64,9 @@ export function Layout() {
                   👑
                 </span>
               )}
-              <span className={styles.userName}>{user.displayName || user.email}</span>
+              <span className={styles.userName}>
+                {user.username || user.displayName || user.email}
+              </span>
               <span className={styles.coins}>{user.coins} 🪙</span>
             </span>
           ) : (

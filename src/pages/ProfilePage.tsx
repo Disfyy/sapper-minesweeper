@@ -103,13 +103,13 @@ export function ProfilePage() {
       <header className={styles.profileHead}>
         <div className={styles.profileIdentity}>
           <ProfileAvatar
-            label={user.displayName || user.email}
+            label={user.username || user.displayName || user.email}
             frameClass={user.equippedProfileFlairFrame}
             badgeEmoji={user.equippedProfileFlairBadge || undefined}
             size="lg"
           />
           <div>
-            <h1 className={styles.h1}>{user.displayName || user.email}</h1>
+            <h1 className={styles.h1}>{user.username || user.displayName || user.email}</h1>
             <p className={styles.muted}>{user.email}</p>
           </div>
         </div>

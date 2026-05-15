@@ -13,7 +13,7 @@ export function RegisterPage() {
   const { t } = useLanguage()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [displayName, setDisplayName] = useState('')
+  const [username, setUsername] = useState('')
   const [city, setCity] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -26,13 +26,16 @@ export function RegisterPage() {
       await register({
         email,
         password,
-        displayName: displayName || undefined,
+        username,
         city: city || undefined,
       })
       await refresh()
       nav('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('registrationFailed'))
+      const msg = err instanceof Error ? err.message : t('registrationFailed')
+      setError(
+        msg === 'Username already taken' ? t('usernameTaken') : msg === 'Failed to fetch' ? t('apiUnreachable') : msg,
+      )
     } finally {
       setPending(false)
     }
@@ -61,10 +64,16 @@ export function RegisterPage() {
           required
         />
         <Input
-          label={t('displayNameOptional')}
+          label={t('username')}
+          hint={t('usernameHint')}
           type="text"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
+          autoComplete="username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          minLength={3}
+          maxLength={20}
+          pattern="[A-Za-z0-9_]+"
+          required
         />
         <Input
           label={t('cityOptional')}

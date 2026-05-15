@@ -33,6 +33,7 @@ function clearSessionToken() {
 
 export type MeResponse = {
   email: string
+  username: string | null
   displayName: string | null
   city: string | null
   coins: number
@@ -103,7 +104,7 @@ export async function getMe(): Promise<MeResponse | null> {
 export async function register(body: {
   email: string
   password: string
-  displayName?: string
+  username: string
   city?: string
 }): Promise<void> {
   const res = await apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(body) })

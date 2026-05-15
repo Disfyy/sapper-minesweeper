@@ -9,6 +9,7 @@ export const WIN_PER_MINUTE_MAX = 5
 export type AuthedUser = {
   id: string
   email: string
+  username: string | null
   display_name: string | null
   city: string | null
   coins: number
@@ -53,7 +54,7 @@ export async function getUserFromRequest(req: {
     userIdFromToken(req.cookies[sessionCookieName])
   if (!userId) return null
   const r = await pool.query<AuthedUser>(
-    `SELECT u.id, u.email, u.display_name, u.city, u.coins,
+    `SELECT u.id, u.email, u.username, u.display_name, u.city, u.coins,
             u.equipped_theme_id, t.slug AS equipped_slug,
             u.equipped_mine_skin_id, ms.slug AS equipped_mine_slug, ms.variant AS equipped_mine_variant,
             u.equipped_victory_effect_id, ve.slug AS equipped_victory_slug, ve.variant AS equipped_victory_variant,
@@ -69,6 +70,15 @@ export async function getUserFromRequest(req: {
     [userId],
   )
   return r.rows[0] ?? null
+}
+
+/** Lowercase handle, 3–20 chars, letters/numbers/underscore only. */
+export function normalizeUsername(input: unknown): string | null {
+  if (typeof input !== 'string') return null
+  const trimmed = input.trim().toLowerCase()
+  if (trimmed.length < 3 || trimmed.length > 20) return null
+  if (!/^[a-z0-9_]+$/.test(trimmed)) return null
+  return trimmed
 }
 
 /** Trim and cap to 64 chars; returns null for empty input. React text rendering is auto-escaped. */
