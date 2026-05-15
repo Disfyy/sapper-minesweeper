@@ -8,9 +8,9 @@
 }
 
 .inner {
-  display: inline-block;
-  min-width: min(100%, calc(var(--cols, 9) * 36px));
-  max-width: calc(var(--cols, 9) * 48px);
+  display: block;
+  width: min(100%, calc(var(--cols, 9) * 44px));
+  margin: 0 auto;
   background: var(--google-board-covered-a);
 }
 
@@ -18,7 +18,7 @@
   display: grid;
   gap: 0;
   align-items: stretch;
-  grid-template-columns: repeat(var(--cols, 9), minmax(32px, 1fr));
+  grid-template-columns: repeat(var(--cols, 9), 1fr);
 }
 
 .cascade > * {
@@ -37,11 +37,10 @@
 
 @media (max-width: 520px) {
   .inner {
-    min-width: min(100%, calc(var(--cols, 9) * 28px));
-    max-width: calc(var(--cols, 9) * 40px);
+    width: min(100%, calc(var(--cols, 9) * 36px));
   }
   .grid {
-    grid-template-columns: repeat(var(--cols, 9), minmax(26px, 1fr));
+    grid-template-columns: repeat(var(--cols, 9), 1fr);
   }
 }
 

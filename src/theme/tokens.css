@@ -53,9 +53,13 @@
   --banner-loss-bg: rgba(239, 68, 68, 0.14);
   --banner-loss-border: rgba(239, 68, 68, 0.45);
 
-  /* chess.com-style strong green for the primary action. Reserved for the single CTA per screen. */
+  /* chess.com-style strong green for the primary action. Reserved for the single CTA per screen.
+     --accent-hover / --accent-active are derived from --accent so they stay correct across the
+     ocean/forest/neon/aurora/sunset accent overrides below. */
   --accent: #81b64c;
   --accent-strong: #5d8a2c;
+  --accent-hover: color-mix(in srgb, var(--accent), white 14%);
+  --accent-active: color-mix(in srgb, var(--accent), black 18%);
   --accent-soft: rgba(129, 182, 76, 0.2);
   --accent-fg: #ffffff;
   --focus-ring: rgba(129, 182, 76, 0.85);
@@ -137,6 +141,8 @@
 
   --accent: #5d8a2c;
   --accent-strong: #466a1c;
+  --accent-hover: color-mix(in srgb, var(--accent), white 16%);
+  --accent-active: color-mix(in srgb, var(--accent), black 18%);
   --accent-soft: rgba(93, 138, 44, 0.14);
   --accent-fg: #ffffff;
   --focus-ring: rgba(93, 138, 44, 0.7);
