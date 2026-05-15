@@ -12,14 +12,15 @@ import {
 import { gameReducer, getElapsedSeconds } from '../../game/game'
 import { createInitialState } from '../../game/state'
 import { useFlagMode } from '../../game/useFlagMode'
-import type { Cell, Difficulty } from '../../game/types'
+import type { MineVariant, VictoryVariant } from '../../cosmetics/types'
+import type { Cell, Difficulty, GameState } from '../../game/types'
 import { SPEED_TIME_LIMIT_MS } from '../../game/types'
 import { useLanguage } from '../../i18n/languageContext'
 import type { TranslationKey } from '../../i18n/translations'
 import { Button } from '../../ui/Button/Button'
 import { Board } from '../Board/Board'
 import { FlagIcon } from '../Cell/icons/FlagIcon'
-import { Confetti } from './Confetti'
+import { VictoryCelebration } from './VictoryCelebration'
 import { ModeToggle } from './ModeToggle'
 import styles from './Game.module.css'
 
@@ -38,10 +39,36 @@ type GameProps = {
   submitOverride?: (input: SubmitGameInput) => Promise<SubmitGameResult>
   /** Hide hints (e.g. competitive modes like daily). */
   hintsDisabled?: boolean
+  /** Receive each accepted state transition so wrappers can sync live modes. */
+  onStateChange?: (state: GameState) => void
+  /** Prevent board interaction while preserving the current board view. */
+  locked?: boolean
+  /** Force a terminal result from outside the local reducer (e.g. duel opponent finished first). */
+  forcedEnd?: { status: 'won' | 'lost'; endedAtMs?: number; score?: number } | null
+  /** Hide the built-in win/loss banner so a wrapper can render its own result UI. */
+  hideResultBanner?: boolean
+  /** Hide restart affordances when the parent mode controls retries. */
+  restartDisabled?: boolean
+  mineVariant?: MineVariant
+  victoryVariant?: VictoryVariant
 }
 
 export function Game(props: GameProps) {
-  const { difficulty, seed, onWinReward, onChangeDifficulty, submitOverride, hintsDisabled } = props
+  const {
+    difficulty,
+    seed,
+    onWinReward,
+    onChangeDifficulty,
+    submitOverride,
+    hintsDisabled,
+    onStateChange,
+    locked,
+    forcedEnd,
+    hideResultBanner,
+    restartDisabled,
+    mineVariant = 'classic',
+    victoryVariant = 'confetti',
+  } = props
   const { t } = useLanguage()
   const [state, dispatch] = useReducer(gameReducer, undefined, () =>
     createInitialState(difficulty, seed),
@@ -57,6 +84,25 @@ export function Game(props: GameProps) {
   const [hintCells, setHintCells] = useState<CoachHint | null>(null)
   const [hintExplanations, setHintExplanations] = useState<string[]>([])
   const hintTimerRef = useRef<number | null>(null)
+  const appliedForcedEndKey = useRef<string | null>(null)
+
+  useEffect(() => {
+    onStateChange?.(state)
+  }, [onStateChange, state])
+
+  useEffect(() => {
+    if (!forcedEnd) return
+    if (state.status === 'won' || state.status === 'lost') return
+    const key = `${forcedEnd.status}:${forcedEnd.endedAtMs ?? 'auto'}:${forcedEnd.score ?? 'keep'}`
+    if (appliedForcedEndKey.current === key) return
+    appliedForcedEndKey.current = key
+    dispatch({
+      type: 'forceEnd',
+      status: forcedEnd.status,
+      nowMs: forcedEnd.endedAtMs ?? Date.now(),
+      score: forcedEnd.score,
+    })
+  }, [forcedEnd, state.status])
 
   useEffect(() => {
     if (!state.startedAtMs || state.endedAtMs) return
@@ -134,27 +180,32 @@ export function Game(props: GameProps) {
   const speedDanger = isSpeedMode && speedRemaining > 0 && speedRemaining <= 10
 
   const onReveal = (cell: Cell) => {
+    if (locked) return
     if (cell.state === 'covered') playSound('reveal')
     dispatch({ type: 'reveal', row: cell.row, col: cell.col, nowMs: Date.now() })
   }
 
   const onToggleFlag = (cell: Cell) => {
+    if (locked) return
     if (cell.state !== 'revealed') playSound('flag')
     dispatch({ type: 'toggleFlag', row: cell.row, col: cell.col, nowMs: Date.now() })
   }
 
   const onChord = (cell: Cell) => {
+    if (locked) return
     playSound('click')
     dispatch({ type: 'chord', row: cell.row, col: cell.col, nowMs: Date.now() })
   }
 
   const onRestart = () => {
+    if (restartDisabled) return
     dispatch({ type: 'restart', difficulty })
     setFocus({ row: 0, col: 0 })
     setNowMs(Date.now())
     setSubmittedGameId(null)
     setGrantedCoins(0)
     lastSubmittedEndMs.current = null
+    appliedForcedEndKey.current = null
     setHintsLeft(HINTS_PER_GAME)
     setHintCells(null)
     setHintExplanations([])
@@ -297,23 +348,25 @@ export function Game(props: GameProps) {
               <span className={styles.iconBtnBadge}>{hintsLeft}</span>
             </button>
           )}
-          <button
-            type="button"
-            className={styles.iconBtn}
-            onClick={onRestart}
-            title={t('restart')}
-            aria-label={t('restart')}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={styles.iconBtnSvg}>
-              <path d="M20 12a8 8 0 1 1-2.3-5.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              <path d="M20 4v5h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+          {!restartDisabled && (
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={onRestart}
+              title={t('restart')}
+              aria-label={t('restart')}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={styles.iconBtnSvg}>
+                <path d="M20 12a8 8 0 1 1-2.3-5.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <path d="M20 4v5h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          )}
         </div>
       </header>
 
       <main className={styles.main}>
-        {finished && (
+        {!hideResultBanner && finished && (
           <div
             className={`${styles.resultBanner} ${state.status === 'won' ? styles.resultWin : styles.resultLoss}`}
             role="status"
@@ -351,13 +404,14 @@ export function Game(props: GameProps) {
           focus={focus}
           setFocus={setFocus}
           flagMode={flagMode}
+          mineVariant={mineVariant}
           hintCells={hintCells}
           onReveal={onReveal}
           onToggleFlag={onToggleFlag}
           onChord={onChord}
         />
 
-        {state.status === 'won' && <Confetti />}
+        {state.status === 'won' && <VictoryCelebration variant={victoryVariant} />}
 
         {hintExplanations.length > 0 && (
           <div className={styles.coachStrip} role="status">

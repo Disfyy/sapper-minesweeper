@@ -198,7 +198,14 @@ export function LeaderboardPage() {
             >
               <span className={styles.rank}>#{entry.rank}</span>
               <span>
-                <strong>{entry.displayName || entry.username || t('anonymousSapper')}</strong>
+                <strong>
+                  {entry.flairBadge ? (
+                    <span className={styles.flairBadge} aria-hidden="true">
+                      {entry.flairBadge}{' '}
+                    </span>
+                  ) : null}
+                  {entry.displayName || entry.username || t('anonymousSapper')}
+                </strong>
                 {entry.username && entry.displayName && (
                   <span className={styles.handle}>@{entry.username}</span>
                 )}

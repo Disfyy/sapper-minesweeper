@@ -120,6 +120,8 @@ export async function registerGameRoutes(app: FastifyInstance) {
           username: string | null
           display_name: string | null
           city: string | null
+          flair_badge: string | null
+          flair_frame: string | null
           best_score: number
           best_ms: number | null
           games_played: number
@@ -128,14 +130,17 @@ export async function registerGameRoutes(app: FastifyInstance) {
              u.username,
              u.display_name,
              u.city,
+             pf.badge_emoji AS flair_badge,
+             pf.frame_class AS flair_frame,
              MAX(g.score)::int AS best_score,
              MIN(g.duration_ms) FILTER (WHERE g.status = 'won')::int AS best_ms,
              COUNT(*)::int AS games_played
            FROM games g
            JOIN users u ON u.id = g.user_id
            JOIN difficulty_presets d ON d.id = g.preset_id
+           LEFT JOIN profile_flairs pf ON pf.id = u.equipped_profile_flair_id
            WHERE g.status <> 'abandoned' AND d.slug = $1${cityClause}
-           GROUP BY u.id
+           GROUP BY u.id, pf.badge_emoji, pf.frame_class
            ORDER BY best_score DESC
            LIMIT 10`,
           args,
@@ -147,6 +152,8 @@ export async function registerGameRoutes(app: FastifyInstance) {
             username: row.username,
             displayName: row.display_name,
             city: row.city,
+            flairBadge: row.flair_badge || null,
+            flairFrame: row.flair_frame || null,
             bestScore: row.best_score,
             bestMs: row.best_ms,
             gamesPlayed: row.games_played,
@@ -158,6 +165,8 @@ export async function registerGameRoutes(app: FastifyInstance) {
         username: string | null
         display_name: string | null
         city: string | null
+        flair_badge: string | null
+        flair_frame: string | null
         best_ms: number
         games_played: number
       }>(
@@ -165,13 +174,16 @@ export async function registerGameRoutes(app: FastifyInstance) {
            u.username,
            u.display_name,
            u.city,
+           pf.badge_emoji AS flair_badge,
+           pf.frame_class AS flair_frame,
            MIN(g.duration_ms)::int AS best_ms,
            COUNT(*)::int AS games_played
          FROM games g
          JOIN users u ON u.id = g.user_id
          JOIN difficulty_presets d ON d.id = g.preset_id
+         LEFT JOIN profile_flairs pf ON pf.id = u.equipped_profile_flair_id
          WHERE g.status = 'won' AND d.slug = $1${cityClause}
-         GROUP BY u.id
+         GROUP BY u.id, pf.badge_emoji, pf.frame_class
          ORDER BY best_ms ASC
          LIMIT 10`,
         args,
@@ -183,6 +195,8 @@ export async function registerGameRoutes(app: FastifyInstance) {
           username: row.username,
           displayName: row.display_name,
           city: row.city,
+          flairBadge: row.flair_badge || null,
+          flairFrame: row.flair_frame || null,
           bestMs: row.best_ms,
           gamesPlayed: row.games_played,
         })),

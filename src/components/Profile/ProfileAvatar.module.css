@@ -1,0 +1,67 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+.lg .frame {
+  width: 72px;
+  height: 72px;
+  font-size: 28px;
+}
+
+.frame {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: var(--stat-bg);
+  color: var(--page-fg);
+  border: 2px solid var(--stat-border);
+}
+
+.initial {
+  line-height: 1;
+}
+
+.badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  font-size: 16px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+.lg .badge {
+  font-size: 20px;
+  right: -2px;
+  bottom: -2px;
+}
+
+.flair-plain {
+  border-color: var(--stat-border);
+}
+
+.flair-bronze {
+  border-color: #b45309;
+  box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.25);
+}
+
+.flair-gold {
+  border-color: #eab308;
+  box-shadow: 0 0 12px rgba(234, 179, 8, 0.35);
+}
+
+.flair-neon {
+  border-color: #22d3ee;
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.45);
+}
+
+.flair-crystal {
+  border-color: #a78bfa;
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.5);
+  background: linear-gradient(145deg, rgba(167, 139, 250, 0.15), var(--stat-bg));
+}

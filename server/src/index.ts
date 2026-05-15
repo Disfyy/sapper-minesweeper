@@ -1,5 +1,6 @@
 import cors from '@fastify/cors'
 import cookie from '@fastify/cookie'
+import websocket from '@fastify/websocket'
 import Fastify from 'fastify'
 import bcrypt from 'bcrypt'
 import 'dotenv/config'
@@ -7,6 +8,8 @@ import { pool } from './db.js'
 import { getJwtSecret, sessionCookieName, signSessionToken } from './auth.js'
 import { registerDailyRoutes } from './routes/daily.js'
 import { registerGameRoutes } from './routes/games.js'
+import { registerMatchRoutes } from './routes/matches.js'
+import { grantDefaultCosmetics, registerMarketRoutes } from './routes/market.js'
 import {
   getUserFromRequest,
   normalizeCity,
@@ -50,6 +53,7 @@ app.register(cors, {
   origin: clientOrigin(),
   credentials: true,
 })
+app.register(websocket)
 
 app.get('/api/health', async () => ({ ok: true }))
 
@@ -95,10 +99,7 @@ app.post<{
     throw e
   }
 
-  await pool.query(
-    `INSERT INTO user_themes (user_id, theme_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`,
-    [userId, defaultThemeId],
-  )
+  await grantDefaultCosmetics(userId, defaultThemeId)
 
   const token = signSessionToken(userId)
   reply.setCookie(sessionCookieName, token, sessionCookieOptions())
@@ -155,6 +156,13 @@ app.get('/api/me', async (req, reply) => {
     coins: user.coins,
     equippedThemeId: user.equipped_theme_id,
     equippedThemeSlug: user.equipped_slug ?? 'default',
+    equippedMineSkinSlug: user.equipped_mine_slug ?? 'classic-mine',
+    equippedMineVariant: user.equipped_mine_variant ?? 'classic',
+    equippedVictoryEffectSlug: user.equipped_victory_slug ?? 'confetti',
+    equippedVictoryVariant: user.equipped_victory_variant ?? 'confetti',
+    equippedProfileFlairSlug: user.equipped_flair_slug ?? 'plain',
+    equippedProfileFlairFrame: user.equipped_flair_frame ?? 'flair-plain',
+    equippedProfileFlairBadge: user.equipped_flair_badge ?? '',
     ownedThemeIds,
     isPro: user.is_pro,
   }
@@ -477,6 +485,12 @@ app.post<{ Body: { sessionId?: string } }>('/api/billing/confirm', async (req, r
        ON CONFLICT DO NOTHING`,
       [user.id],
     )
+    await client.query(
+      `INSERT INTO user_profile_flairs (user_id, profile_flair_id)
+       SELECT $1, p.id FROM profile_flairs p WHERE p.pro_only = TRUE
+       ON CONFLICT DO NOTHING`,
+      [user.id],
+    )
 
     await client.query('COMMIT')
     return { ok: true }
@@ -490,6 +504,8 @@ app.post<{ Body: { sessionId?: string } }>('/api/billing/confirm', async (req, r
 
 await registerGameRoutes(app)
 await registerDailyRoutes(app)
+await registerMarketRoutes(app)
+await registerMatchRoutes(app)
 
 const port = Number(process.env.PORT ?? 3001)
 

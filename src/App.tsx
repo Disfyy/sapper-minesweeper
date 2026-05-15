@@ -4,6 +4,8 @@ import { Layout } from './components/Layout/Layout'
 import { AnalysisPage } from './pages/AnalysisPage'
 import { CheckoutPage } from './pages/CheckoutPage'
 import { DailyPage } from './pages/DailyPage'
+import { DuelMatchPage } from './pages/DuelMatchPage'
+import { DuelPage } from './pages/DuelPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
@@ -23,6 +25,8 @@ export default function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/play" element={<PlayPage />} />
             <Route path="/daily" element={<DailyPage />} />
+            <Route path="/duel" element={<DuelPage />} />
+            <Route path="/duel/:matchId" element={<DuelMatchPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/history/:id" element={<AnalysisPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />

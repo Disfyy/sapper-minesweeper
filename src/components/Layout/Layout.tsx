@@ -22,6 +22,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { to: '/', labelKey: 'navHome', icon: '🏠' },
   { to: '/play', labelKey: 'navPlay', icon: '▶️', mobile: true },
+  { to: '/duel', labelKey: 'navDuel', icon: '⚔️', requiresAuth: true },
   { to: '/daily', labelKey: 'navDaily', icon: '⚡', mobile: true },
   { to: '/leaderboard', labelKey: 'navLeaderboard', icon: '🏆', mobile: true },
   { to: '/history', labelKey: 'navHistory', icon: '📜', requiresAuth: true },

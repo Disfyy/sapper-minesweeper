@@ -71,6 +71,8 @@ export function PlayPage() {
       themeStyle={themeStyle}
       onWinReward={user ? onWinReward : undefined}
       onChangeDifficulty={onChangeDifficulty}
+      mineVariant={user?.equippedMineVariant ?? 'classic'}
+      victoryVariant={user?.equippedVictoryVariant ?? 'confetti'}
     />
   )
 }

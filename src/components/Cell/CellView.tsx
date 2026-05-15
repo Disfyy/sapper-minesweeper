@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import type { MineVariant } from '../../cosmetics/types'
 import type { Cell, GameStatus } from '../../game/types'
 import { useLanguage } from '../../i18n/languageContext'
 import type { TranslationKey } from '../../i18n/translations'
@@ -53,6 +54,7 @@ export function CellView(props: {
   isFocused: boolean
   tabIndex: number
   flagMode?: boolean
+  mineVariant?: MineVariant
   hint?: 'safe' | 'mine'
   edges?: CellEdges
   onFocus: () => void
@@ -61,7 +63,7 @@ export function CellView(props: {
   onChord?: () => void
 }) {
   const { t } = useLanguage()
-  const { cell, flagMode, hint, edges } = props
+  const { cell, flagMode, hint, edges, mineVariant = 'classic' } = props
   const revealOnEnd = props.gameStatus === 'lost' || props.gameStatus === 'won'
   const longPressTimerRef = useRef<number | null>(null)
   const longPressTriggeredRef = useRef(false)
@@ -71,7 +73,7 @@ export function CellView(props: {
 
   let content: React.ReactNode = null
   let numberValue: number | null = null
-  if (showsMine) content = <MineIcon className={styles.iconSvg} />
+  if (showsMine) content = <MineIcon className={styles.iconSvg} variant={mineVariant} />
   else if (showsWrongFlag) content = <WrongFlagIcon className={styles.iconSvg} />
   else if (cell.state === 'flagged') content = <FlagIcon className={styles.iconSvg} />
   else if (cell.state === 'revealed' && !cell.isMine && cell.adjacentMines > 0) {

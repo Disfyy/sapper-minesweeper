@@ -10,6 +10,7 @@ import {
 } from '../api/client'
 import { useAuth } from '../auth/useAuth'
 import { useLanguage } from '../i18n/languageContext'
+import { ProfileAvatar } from '../components/Profile/ProfileAvatar'
 import { Button } from '../ui/Button/Button'
 import { Card } from '../ui/Card/Card'
 import { Input } from '../ui/Input/Input'
@@ -100,9 +101,17 @@ export function ProfilePage() {
   return (
     <div className={styles.profile}>
       <header className={styles.profileHead}>
-        <div>
-          <h1 className={styles.h1}>{user.displayName || user.email}</h1>
-          <p className={styles.muted}>{user.email}</p>
+        <div className={styles.profileIdentity}>
+          <ProfileAvatar
+            label={user.displayName || user.email}
+            frameClass={user.equippedProfileFlairFrame}
+            badgeEmoji={user.equippedProfileFlairBadge || undefined}
+            size="lg"
+          />
+          <div>
+            <h1 className={styles.h1}>{user.displayName || user.email}</h1>
+            <p className={styles.muted}>{user.email}</p>
+          </div>
         </div>
         <div className={styles.coinsPill}>{user.coins} 🪙</div>
       </header>

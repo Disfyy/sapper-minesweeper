@@ -165,6 +165,8 @@ export function DailyPage() {
             onWinReward={onWinReward}
             submitOverride={submitOverride}
             hintsDisabled
+            mineVariant={user?.equippedMineVariant ?? 'classic'}
+            victoryVariant={user?.equippedVictoryVariant ?? 'confetti'}
           />
         )
       )}

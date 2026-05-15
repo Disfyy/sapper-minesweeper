@@ -1,4 +1,17 @@
+import type {
+  CosmeticKind,
+  MarketMineSkin,
+  MarketProfileFlair,
+  MarketVictoryEffect,
+  MineVariant,
+  VictoryVariant,
+} from '../cosmetics/types'
+
 const base = () => import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
+
+function wsBase(): string {
+  return base().replace(/^http/i, 'ws')
+}
 
 export type MeResponse = {
   email: string
@@ -7,6 +20,13 @@ export type MeResponse = {
   coins: number
   equippedThemeId: number | null
   equippedThemeSlug: string
+  equippedMineSkinSlug: string
+  equippedMineVariant: MineVariant
+  equippedVictoryEffectSlug: string
+  equippedVictoryVariant: VictoryVariant
+  equippedProfileFlairSlug: string
+  equippedProfileFlairFrame: string
+  equippedProfileFlairBadge: string
   ownedThemeIds: number[]
   isPro: boolean
 }
@@ -113,6 +133,42 @@ export async function equipTheme(themeId: number): Promise<void> {
   if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Equip failed'))
 }
 
+export type MarketCatalog = {
+  themes: MarketTheme[]
+  mineSkins: MarketMineSkin[]
+  victoryEffects: MarketVictoryEffect[]
+  profileFlairs: MarketProfileFlair[]
+  isPro: boolean
+}
+
+export async function getMarketCatalog(): Promise<MarketCatalog> {
+  const res = await apiFetch('/api/market/catalog')
+  if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Failed to load market'))
+  return parseJson<MarketCatalog>(res)
+}
+
+export async function purchaseMarketItem(
+  kind: CosmeticKind,
+  itemId: number,
+): Promise<{ coins: number }> {
+  const res = await apiFetch('/api/market/purchase-item', {
+    method: 'POST',
+    body: JSON.stringify({ kind, itemId }),
+  })
+  const text = await res.text()
+  if (!res.ok) throw new Error(messageFromErrorBody(text, 'Purchase failed'))
+  const j = JSON.parse(text) as { coins?: number }
+  return { coins: j.coins ?? 0 }
+}
+
+export async function equipMarketItem(kind: CosmeticKind, itemId: number): Promise<void> {
+  const res = await apiFetch('/api/me/equip-item', {
+    method: 'POST',
+    body: JSON.stringify({ kind, itemId }),
+  })
+  if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Equip failed'))
+}
+
 export async function claimWinReward(): Promise<{ granted: number; coins: number }> {
   const res = await apiFetch('/api/rewards/win', { method: 'POST', body: '{}' })
   const text = await res.text()
@@ -143,6 +199,8 @@ export type LeaderboardEntry = {
   username: string | null
   displayName: string | null
   city: string | null
+  flairBadge?: string | null
+  flairFrame?: string | null
   /** Best clearing time in ms — present for time-ranked modes; for speed it may be null if user never won. */
   bestMs: number | null
   /** Speed-mode only: best score (cells × 10 + leftover-time bonus). */
@@ -366,4 +424,89 @@ export async function submitDailyAttempt(input: DailySubmitInput): Promise<Daily
   }
   if (!res.ok) throw new Error(messageFromErrorBody(text, 'Daily submit failed'))
   return JSON.parse(text) as DailySubmitResult
+}
+
+export type MatchStatus = 'waiting' | 'ready' | 'playing' | 'finished' | 'cancelled'
+export type MatchPlayerStatus = 'joined' | 'ready' | 'playing' | 'won' | 'lost' | 'draw' | 'left'
+
+export type MatchPlayer = {
+  userId: string
+  email: string
+  displayName: string | null
+  side: 'host' | 'guest'
+  status: MatchPlayerStatus
+  score: number
+  durationMs: number
+  revealedSafeCount: number
+  flagsPlaced: number
+  gameId: string | null
+  joinedAt: string
+  updatedAt: string
+}
+
+export type MatchSnapshot = {
+  id: string
+  code: string
+  status: MatchStatus
+  seed: number
+  winnerUserId: string | null
+  createdAt: string
+  startedAt: string | null
+  endedAt: string | null
+  difficulty: {
+    presetSlug: string | null
+    rows: number
+    cols: number
+    mines: number
+  }
+  players: MatchPlayer[]
+  viewerUserId: string
+}
+
+export async function createMatch(input: { presetSlug: string }): Promise<MatchSnapshot> {
+  const res = await apiFetch('/api/matches', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+  const text = await res.text()
+  if (!res.ok) throw new Error(messageFromErrorBody(text, 'Failed to create match'))
+  return JSON.parse(text) as MatchSnapshot
+}
+
+export async function joinMatch(input: { code: string }): Promise<MatchSnapshot> {
+  const res = await apiFetch('/api/matches/join', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+  const text = await res.text()
+  if (!res.ok) throw new Error(messageFromErrorBody(text, 'Failed to join match'))
+  return JSON.parse(text) as MatchSnapshot
+}
+
+export async function getMatch(matchId: string): Promise<MatchSnapshot> {
+  const res = await apiFetch(`/api/matches/${matchId}`)
+  if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Failed to load match'))
+  return parseJson<MatchSnapshot>(res)
+}
+
+export type FinishMatchInput = SubmitGameInput & {
+  revealedSafeCount: number
+  flagsPlaced: number
+}
+
+export async function finishMatch(
+  matchId: string,
+  input: FinishMatchInput,
+): Promise<{ gameId: string; match: MatchSnapshot }> {
+  const res = await apiFetch(`/api/matches/${matchId}/finish`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  })
+  const text = await res.text()
+  if (!res.ok) throw new Error(messageFromErrorBody(text, 'Failed to finish match'))
+  return JSON.parse(text) as { gameId: string; match: MatchSnapshot }
+}
+
+export function matchSocketUrl(matchId: string): string {
+  return `${wsBase()}/api/matches/${matchId}/live`
 }

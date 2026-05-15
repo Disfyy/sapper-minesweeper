@@ -242,6 +242,85 @@
   flex-wrap: wrap;
 }
 
+.profileIdentity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.shopTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.shopTab {
+  appearance: none;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--page-fg-muted);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shopTabActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.shopPreview {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: var(--surface-1);
+  border: 1px solid var(--stat-border);
+}
+
+.previewMine {
+  width: 36px;
+  height: 36px;
+}
+
+.previewVictory {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.accentDot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--stat-border);
+}
+
+.accentDot[data-accent='ocean'] {
+  background: #0ea5e9;
+}
+
+.accentDot[data-accent='forest'] {
+  background: #22c55e;
+}
+
+.accentDot[data-accent='neon'] {
+  background: #d946ef;
+}
+
+.accentDot[data-accent='aurora'] {
+  background: #818cf8;
+}
+
+.accentDot[data-accent='sunset'] {
+  background: #fb923c;
+}
+
 .coinsPill {
   font-size: 18px;
   font-weight: 700;

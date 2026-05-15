@@ -1,0 +1,30 @@
+# Deploy API + Postgres on Render: Dashboard → New → Blueprint → select this repo.
+# After deploy, set CLIENT_ORIGIN to your Vercel URL and redeploy.
+
+databases:
+  - name: sapper-db
+    plan: free
+    databaseName: sapper
+    user: sapper
+
+services:
+  - type: web
+    name: sapper-api
+    runtime: node
+    rootDir: server
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build && npm run migrate
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sapper-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: NODE_ENV
+        value: production

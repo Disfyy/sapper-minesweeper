@@ -4,7 +4,7 @@ A modern web platform for Minesweeper that turns a 35-year-old single-player gam
 
 > Think **chess.com for Minesweeper**: instant play, daily challenges with a global leaderboard, an AI coach that explains why a cell is safe, and a cosmetic economy on top.
 
-**Live demo:** _coming — paste your deploy URL here before submission_
+**Live demo:** Deploy frontend on [Vercel](https://vercel.com) (`VITE_API_URL` → Render API URL) and API+DB via [Render Blueprint](https://dashboard.render.com) using root `render.yaml`.
 **Repo:** https://github.com/Disfyy/sapper-minesweeper
 
 ---

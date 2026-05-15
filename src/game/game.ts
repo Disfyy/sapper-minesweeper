@@ -11,6 +11,7 @@ export type GameAction =
   | { type: 'chord'; row: number; col: number; nowMs: number }
   | { type: 'tick'; nowMs: number }
   | { type: 'timeUp'; nowMs: number }
+  | { type: 'forceEnd'; status: 'won' | 'lost'; nowMs: number; score?: number }
   | { type: 'loadAnalysis'; state: GameState }
 
 function isSpeed(state: GameState): boolean {
@@ -158,6 +159,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           revealedSafeCount: state.revealedSafeCount,
           durationMs,
         }),
+      }
+    }
+    case 'forceEnd': {
+      if (state.status === 'won' || state.status === 'lost') return state
+      return {
+        ...state,
+        status: action.status,
+        endedAtMs: action.nowMs,
+        score: action.score ?? state.score,
       }
     }
     default: {

@@ -30,6 +30,10 @@
   font-weight: 800;
 }
 
+.flairBadge {
+  margin-right: 2px;
+}
+
 .segmented {
   display: flex;
   gap: 8px;

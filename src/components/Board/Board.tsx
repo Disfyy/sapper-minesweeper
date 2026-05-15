@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import type { MineVariant } from '../../cosmetics/types'
 import type { CoachHint } from '../../game/coach'
 import type { Cell, GameStatus } from '../../game/types'
 import { useLanguage } from '../../i18n/languageContext'
@@ -21,6 +22,7 @@ export function Board(props: {
   focus: Focus
   setFocus: (f: Focus) => void
   flagMode?: boolean
+  mineVariant?: MineVariant
   hintCells?: CoachHint | null
   onReveal: (cell: Cell) => void
   onToggleFlag: (cell: Cell) => void
@@ -110,6 +112,7 @@ export function Board(props: {
                   isFocused={props.focus.row === r && props.focus.col === c}
                   tabIndex={props.focus.row === r && props.focus.col === c ? 0 : -1}
                   flagMode={props.flagMode}
+                  mineVariant={props.mineVariant}
                   hint={hint}
                   edges={edges}
                   onFocus={() => props.setFocus({ row: r, col: c })}
