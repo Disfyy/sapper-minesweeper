@@ -700,7 +700,11 @@ export async function registerMatchRoutes(app: FastifyInstance) {
     '/api/matches/:id/live',
     { websocket: true },
     async (socket, request) => {
-      const user = await getUserFromRequest(request)
+      const user = await getUserFromRequest({
+        cookies: request.cookies,
+        headers: request.headers,
+        query: request.query,
+      })
       if (!user) {
         socket.close(4401, 'Unauthorized')
         return

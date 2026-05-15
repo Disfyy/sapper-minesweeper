@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link, NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../auth/useAuth'
 import { useLanguage } from '../../i18n/languageContext'
 import type { TranslationKey } from '../../i18n/translations'
@@ -32,6 +32,7 @@ const NAV_ITEMS: NavItem[] = [
 
 export function Layout() {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const { setAccent } = useTheme()
   const { t } = useLanguage()
 
@@ -68,16 +69,12 @@ export function Layout() {
             </span>
           ) : (
             <>
-              <Link to="/login">
-                <Button variant="ghost" size="sm">
-                  {t('logIn')}
-                </Button>
-              </Link>
-              <Link to="/register">
-                <Button variant="primary" size="sm">
-                  {t('signUp')}
-                </Button>
-              </Link>
+              <Button variant="ghost" size="sm" type="button" onClick={() => navigate('/login')}>
+                {t('logIn')}
+              </Button>
+              <Button variant="primary" size="sm" type="button" onClick={() => navigate('/register')}>
+                {t('signUp')}
+              </Button>
             </>
           )}
         </div>

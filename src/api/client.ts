@@ -7,10 +7,28 @@ import type {
   VictoryVariant,
 } from '../cosmetics/types'
 
+const SESSION_TOKEN_KEY = 'sapper_session_token'
+
 const base = () => import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 
 function wsBase(): string {
   return base().replace(/^http/i, 'ws')
+}
+
+export function getSessionToken(): string | null {
+  try {
+    return localStorage.getItem(SESSION_TOKEN_KEY)
+  } catch {
+    return null
+  }
+}
+
+function setSessionToken(token: string) {
+  localStorage.setItem(SESSION_TOKEN_KEY, token)
+}
+
+function clearSessionToken() {
+  localStorage.removeItem(SESSION_TOKEN_KEY)
 }
 
 export type MeResponse = {
@@ -63,11 +81,13 @@ async function readApiErrorMessage(res: Response, fallback: string): Promise<str
 }
 
 export async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  const token = getSessionToken()
   return fetch(`${base()}${path}`, {
     ...init,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(init?.headers ?? {}),
     },
   })
@@ -88,6 +108,8 @@ export async function register(body: {
 }): Promise<void> {
   const res = await apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(body) })
   if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Registration failed'))
+  const data = await parseJson<{ token?: string }>(res)
+  if (data.token) setSessionToken(data.token)
 }
 
 export async function updateCity(city: string | null): Promise<{ city: string | null }> {
@@ -102,10 +124,16 @@ export async function updateCity(city: string | null): Promise<{ city: string | 
 export async function login(body: { email: string; password: string }): Promise<void> {
   const res = await apiFetch('/api/auth/login', { method: 'POST', body: JSON.stringify(body) })
   if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Login failed'))
+  const data = await parseJson<{ token?: string }>(res)
+  if (data.token) setSessionToken(data.token)
 }
 
 export async function logout(): Promise<void> {
-  await apiFetch('/api/auth/logout', { method: 'POST', body: '{}' })
+  try {
+    await apiFetch('/api/auth/logout', { method: 'POST', body: '{}' })
+  } finally {
+    clearSessionToken()
+  }
 }
 
 export async function getMarketThemes(): Promise<{ themes: MarketTheme[]; isPro: boolean }> {
@@ -508,5 +536,7 @@ export async function finishMatch(
 }
 
 export function matchSocketUrl(matchId: string): string {
-  return `${wsBase()}/api/matches/${matchId}/live`
+  const token = getSessionToken()
+  const qs = token ? `?token=${encodeURIComponent(token)}` : ''
+  return `${wsBase()}/api/matches/${matchId}/live${qs}`
 }

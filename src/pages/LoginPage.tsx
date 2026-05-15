@@ -25,7 +25,8 @@ export function LoginPage() {
       await refresh()
       nav('/')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('loginFailed'))
+      const msg = err instanceof Error ? err.message : t('loginFailed')
+      setError(msg === 'Failed to fetch' ? t('apiUnreachable') : msg)
     } finally {
       setPending(false)
     }

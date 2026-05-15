@@ -256,6 +256,8 @@ export const translations = {
     email: 'Email',
     password: 'Password',
     loginFailed: 'Login failed',
+    apiUnreachable:
+      'Cannot reach the game server. Check VITE_API_URL on Vercel and that the Render API is running.',
     signingIn: 'Signing in…',
     noAccount: 'No account?',
     register: 'Register',
@@ -583,6 +585,8 @@ export const translations = {
     email: 'Email',
     password: 'Пароль',
     loginFailed: 'Вход не удался',
+    apiUnreachable:
+      'Не удаётся подключиться к серверу. Проверьте VITE_API_URL на Vercel и что API на Render запущен.',
     signingIn: 'Входим…',
     noAccount: 'Нет аккаунта?',
     register: 'Зарегистрироваться',

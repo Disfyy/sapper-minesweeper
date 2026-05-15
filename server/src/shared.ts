@@ -27,13 +27,31 @@ export type AuthedUser = {
   is_pro: boolean
 }
 
-export async function getUserFromRequest(req: {
-  cookies: Record<string, string | undefined>
-}): Promise<AuthedUser | null> {
-  const raw = req.cookies[sessionCookieName]
+function userIdFromToken(raw: string | undefined): string | null {
   if (!raw) return null
   const v = verifySessionToken(raw)
-  if (!v) return null
+  return v?.userId ?? null
+}
+
+function tokenFromQuery(query: unknown): string | undefined {
+  if (!query || typeof query !== 'object' || !('token' in query)) return undefined
+  const value = (query as { token?: unknown }).token
+  return typeof value === 'string' ? value : undefined
+}
+
+export async function getUserFromRequest(req: {
+  cookies: Record<string, string | undefined>
+  headers?: { authorization?: string }
+  query?: unknown
+}): Promise<AuthedUser | null> {
+  const bearer = req.headers?.authorization?.startsWith('Bearer ')
+    ? req.headers.authorization.slice(7)
+    : undefined
+  const userId =
+    userIdFromToken(bearer) ??
+    userIdFromToken(tokenFromQuery(req.query)) ??
+    userIdFromToken(req.cookies[sessionCookieName])
+  if (!userId) return null
   const r = await pool.query<AuthedUser>(
     `SELECT u.id, u.email, u.display_name, u.city, u.coins,
             u.equipped_theme_id, t.slug AS equipped_slug,
@@ -48,7 +66,7 @@ export async function getUserFromRequest(req: {
      LEFT JOIN victory_effects ve ON ve.id = u.equipped_victory_effect_id
      LEFT JOIN profile_flairs pf ON pf.id = u.equipped_profile_flair_id
      WHERE u.id = $1`,
-    [v.userId],
+    [userId],
   )
   return r.rows[0] ?? null
 }

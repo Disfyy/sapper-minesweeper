@@ -109,7 +109,7 @@ app.post<{
   const token = signSessionToken(userId)
   reply.setCookie(sessionCookieName, token, sessionCookieOptions())
 
-  return { ok: true, userId }
+  return { ok: true, userId, token }
 })
 
 app.post<{ Body: { email?: string; password?: string } }>('/api/auth/login', async (req, reply) => {
@@ -134,7 +134,7 @@ app.post<{ Body: { email?: string; password?: string } }>('/api/auth/login', asy
 
   const token = signSessionToken(row.id)
   reply.setCookie(sessionCookieName, token, sessionCookieOptions())
-  return { ok: true }
+  return { ok: true, token }
 })
 
 app.post('/api/auth/logout', async (_req, reply) => {
