@@ -14,8 +14,8 @@ services:
     rootDir: server
     plan: free
     region: oregon
-    buildCommand: npm install --include=dev && npm run build
-    startCommand: npm run release
+    buildCommand: npm install --include=dev && npm run build && npm run migrate:prod
+    startCommand: npm start
     healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL

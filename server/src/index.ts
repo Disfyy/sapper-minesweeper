@@ -56,6 +56,11 @@ app.register(cors, {
 app.register(websocket)
 
 app.get('/api/health', async () => ({ ok: true }))
+app.get('/', async () => ({
+  ok: true,
+  service: 'sapper-api',
+  health: '/api/health',
+}))
 
 app.post<{
   Body: { email?: string; password?: string; displayName?: string; city?: string }
