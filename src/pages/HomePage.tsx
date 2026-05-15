@@ -1,71 +1,73 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
-import heroImg from '../assets/hero.png'
 import { useLanguage } from '../i18n/languageContext'
 import { Button } from '../ui/Button/Button'
-import { Card } from '../ui/Card/Card'
-import { Hero } from '../ui/Hero/Hero'
-import styles from './Pages.module.css'
+import styles from './Home.module.css'
+
+type ModeCard = {
+  to: string
+  emoji: string
+  titleKey: 'modeBeginnerTitle' | 'modeDailyTitle' | 'modeSpeedTitle' | 'modeLeaderboardTitle'
+  bodyKey: 'modeBeginnerBody' | 'modeDailyBody' | 'modeSpeedBody' | 'modeLeaderboardBody'
+}
+
+const MODE_CARDS: ModeCard[] = [
+  { to: '/play', emoji: '♟', titleKey: 'modeBeginnerTitle', bodyKey: 'modeBeginnerBody' },
+  { to: '/daily', emoji: '⚡', titleKey: 'modeDailyTitle', bodyKey: 'modeDailyBody' },
+  { to: '/play?difficulty=speed', emoji: '⏱', titleKey: 'modeSpeedTitle', bodyKey: 'modeSpeedBody' },
+  { to: '/leaderboard', emoji: '🏆', titleKey: 'modeLeaderboardTitle', bodyKey: 'modeLeaderboardBody' },
+]
 
 export function HomePage() {
   const { user } = useAuth()
   const { t } = useLanguage()
 
   return (
-    <div className={styles.home}>
-      <Hero
-        image={heroImg}
-        imageAlt={t('homeHeroAlt')}
-        eyebrow={t('homeEyebrow')}
-        title={t('homeTitle')}
-        tagline={t('homeTagline')}
-        actions={
-          <>
-            <Link to="/play">
-              <Button variant="primary" size="lg">
-                {t('playNow')}
-              </Button>
-            </Link>
-            <Link to="/daily">
-              <Button variant="secondary" size="lg">
-                {t('todaysChallenge')}
-              </Button>
-            </Link>
-            {user ? (
-              <Link to="/history">
-                <Button variant="ghost" size="lg">
-                  {t('yourHistory')}
-                </Button>
-              </Link>
-            ) : (
-              <Link to="/register">
-                <Button variant="ghost" size="lg">
-                  {t('signUp')}
-                </Button>
-              </Link>
-            )}
-          </>
-        }
-        trust={t('homeTrust')}
-      />
+    <div className={styles.page}>
+      <section className={styles.hero}>
+        <p className={styles.eyebrow}>{t('homeEyebrow')}</p>
+        <h1 className={styles.title}>{t('homeTitle')}</h1>
+        <p className={styles.tagline}>{t('homeTagline')}</p>
 
-      <section className={styles.features}>
-        <Card title={t('featureStreaksTitle')} subtitle={t('featureStreaksSubtitle')}>
-          <p className={styles.featureBody}>
-            {t('featureStreaksBody')}
-          </p>
-        </Card>
-        <Card title={t('featureHistoryTitle')} subtitle={t('featureHistorySubtitle')}>
-          <p className={styles.featureBody}>
-            {t('featureHistoryBody')}
-          </p>
-        </Card>
-        <Card title={t('featureRaceTitle')} subtitle={t('featureRaceSubtitle')}>
-          <p className={styles.featureBody}>
-            {t('featureRaceBody')}
-          </p>
-        </Card>
+        <div className={styles.heroActions}>
+          <Link to="/play?difficulty=beginner" className={styles.primaryLink}>
+            <Button variant="primary" size="lg">
+              ▶ {t('playNow')}
+            </Button>
+          </Link>
+          <Link to="/play" className={styles.secondaryLink}>
+            <Button variant="ghost" size="lg">
+              {t('pickDifficulty')}
+            </Button>
+          </Link>
+        </div>
+        <p className={styles.trust}>{t('homeTrust')}</p>
       </section>
+
+      <section className={styles.modesSection}>
+        <h2 className={styles.h2}>{t('pickAMode')}</h2>
+        <div className={styles.modeGrid}>
+          {MODE_CARDS.map((card) => (
+            <Link key={card.to} to={card.to} className={styles.modeCard}>
+              <span className={styles.modeEmoji} aria-hidden="true">
+                {card.emoji}
+              </span>
+              <span className={styles.modeTitle}>{t(card.titleKey)}</span>
+              <span className={styles.modeBody}>{t(card.bodyKey)}</span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {!user && (
+        <section className={styles.signupBanner}>
+          <p>
+            {t('guestBannerPrefix')} <Link to="/register">{t('signUp')}</Link>{' '}
+            {t('guestBannerOr')} <Link to="/login">{t('logIn')}</Link>{' '}
+            {t('guestBannerSuffix')}
+          </p>
+        </section>
+      )}
     </div>
   )
 }

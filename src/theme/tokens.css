@@ -6,8 +6,8 @@
 
   --page-bg-base: linear-gradient(180deg, #0a0e17, #0b0f19 60%, #0a0d14);
   --page-bg-accent:
-    radial-gradient(1200px 600px at 18% -10%, rgba(99, 102, 241, 0.18), transparent 70%),
-    radial-gradient(900px 500px at 82% -10%, rgba(16, 185, 129, 0.12), transparent 70%);
+    radial-gradient(1200px 600px at 18% -10%, rgba(127, 166, 80, 0.18), transparent 70%),
+    radial-gradient(900px 500px at 82% -10%, rgba(34, 197, 94, 0.12), transparent 70%);
   --page-bg: var(--page-bg-accent), var(--page-bg-base);
 
   --page-fg: #e7eaf0;
@@ -53,11 +53,12 @@
   --banner-loss-bg: rgba(239, 68, 68, 0.14);
   --banner-loss-border: rgba(239, 68, 68, 0.45);
 
-  --accent: #818cf8;
-  --accent-strong: #6366f1;
-  --accent-soft: rgba(129, 140, 248, 0.18);
+  /* chess.com-style strong green for the primary action. Reserved for the single CTA per screen. */
+  --accent: #81b64c;
+  --accent-strong: #5d8a2c;
+  --accent-soft: rgba(129, 182, 76, 0.2);
   --accent-fg: #ffffff;
-  --focus-ring: rgba(129, 140, 248, 0.85);
+  --focus-ring: rgba(129, 182, 76, 0.85);
 
   --n1: #60a5fa;
   --n2: #34d399;
@@ -74,8 +75,8 @@
 
   --page-bg-base: linear-gradient(180deg, #fbf9f4, #f0ece3);
   --page-bg-accent:
-    radial-gradient(1200px 600px at 18% -10%, rgba(99, 102, 241, 0.14), transparent 70%),
-    radial-gradient(900px 500px at 82% -10%, rgba(16, 185, 129, 0.1), transparent 70%);
+    radial-gradient(1200px 600px at 18% -10%, rgba(129, 182, 76, 0.14), transparent 70%),
+    radial-gradient(900px 500px at 82% -10%, rgba(34, 197, 94, 0.1), transparent 70%);
   --page-bg: var(--page-bg-accent), var(--page-bg-base);
 
   --page-fg: #161a22;
@@ -121,11 +122,11 @@
   --banner-loss-bg: rgba(239, 68, 68, 0.14);
   --banner-loss-border: rgba(239, 68, 68, 0.45);
 
-  --accent: #4f46e5;
-  --accent-strong: #4338ca;
-  --accent-soft: rgba(79, 70, 229, 0.12);
+  --accent: #5d8a2c;
+  --accent-strong: #466a1c;
+  --accent-soft: rgba(93, 138, 44, 0.14);
   --accent-fg: #ffffff;
-  --focus-ring: rgba(79, 70, 229, 0.7);
+  --focus-ring: rgba(93, 138, 44, 0.7);
 
   --n1: #1d4ed8;
   --n2: #047857;

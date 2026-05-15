@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { pool } from '../db.js'
 import {
   getUserFromRequest,
+  normalizeCity,
   WIN_COINS,
   WIN_DAILY_CAP,
   WIN_MIN_INTERVAL_MS,
@@ -99,38 +100,81 @@ export async function registerGameRoutes(app: FastifyInstance) {
     return { presets: r.rows }
   })
 
-  app.get<{ Querystring: { difficulty?: string } }>('/api/leaderboard', async (req, reply) => {
-    const difficulty = req.query.difficulty
-    if (!isLeaderboardDifficulty(difficulty)) {
-      return reply.status(400).send({ error: 'Invalid difficulty' })
-    }
+  app.get<{ Querystring: { difficulty?: string; city?: string } }>(
+    '/api/leaderboard',
+    async (req, reply) => {
+      const difficulty = req.query.difficulty
+      if (!isLeaderboardDifficulty(difficulty)) {
+        return reply.status(400).send({ error: 'Invalid difficulty' })
+      }
+      const city = normalizeCity(req.query.city)
+      const cityClause = city ? ' AND u.city = $2' : ''
+      const args: unknown[] = city ? [difficulty, city] : [difficulty]
 
-    // Speed mode ranks by highest score (cells cleared + time-left bonus).
-    // Regular modes rank by fastest completion (lowest duration_ms).
-    // Speed counts any finished game (status != 'abandoned') so timeouts still appear;
-    // regular modes only count wins.
-    if (difficulty === 'speed') {
+      // Speed mode ranks by highest score (cells cleared + time-left bonus).
+      // Regular modes rank by fastest completion (lowest duration_ms).
+      // Speed counts any finished game (status != 'abandoned') so timeouts still appear;
+      // regular modes only count wins.
+      if (difficulty === 'speed') {
+        const r = await pool.query<{
+          username: string | null
+          display_name: string | null
+          city: string | null
+          best_score: number
+          best_ms: number | null
+          games_played: number
+        }>(
+          `SELECT
+             u.username,
+             u.display_name,
+             u.city,
+             MAX(g.score)::int AS best_score,
+             MIN(g.duration_ms) FILTER (WHERE g.status = 'won')::int AS best_ms,
+             COUNT(*)::int AS games_played
+           FROM games g
+           JOIN users u ON u.id = g.user_id
+           JOIN difficulty_presets d ON d.id = g.preset_id
+           WHERE g.status <> 'abandoned' AND d.slug = $1${cityClause}
+           GROUP BY u.id
+           ORDER BY best_score DESC
+           LIMIT 10`,
+          args,
+        )
+
+        return {
+          items: r.rows.map((row, index) => ({
+            rank: index + 1,
+            username: row.username,
+            displayName: row.display_name,
+            city: row.city,
+            bestScore: row.best_score,
+            bestMs: row.best_ms,
+            gamesPlayed: row.games_played,
+          })),
+        }
+      }
+
       const r = await pool.query<{
         username: string | null
         display_name: string | null
-        best_score: number
-        best_ms: number | null
+        city: string | null
+        best_ms: number
         games_played: number
       }>(
         `SELECT
            u.username,
            u.display_name,
-           MAX(g.score)::int AS best_score,
-           MIN(g.duration_ms) FILTER (WHERE g.status = 'won')::int AS best_ms,
+           u.city,
+           MIN(g.duration_ms)::int AS best_ms,
            COUNT(*)::int AS games_played
          FROM games g
          JOIN users u ON u.id = g.user_id
          JOIN difficulty_presets d ON d.id = g.preset_id
-         WHERE g.status <> 'abandoned' AND d.slug = $1
+         WHERE g.status = 'won' AND d.slug = $1${cityClause}
          GROUP BY u.id
-         ORDER BY best_score DESC
+         ORDER BY best_ms ASC
          LIMIT 10`,
-        [difficulty],
+        args,
       )
 
       return {
@@ -138,44 +182,13 @@ export async function registerGameRoutes(app: FastifyInstance) {
           rank: index + 1,
           username: row.username,
           displayName: row.display_name,
-          bestScore: row.best_score,
+          city: row.city,
           bestMs: row.best_ms,
           gamesPlayed: row.games_played,
         })),
       }
-    }
-
-    const r = await pool.query<{
-      username: string | null
-      display_name: string | null
-      best_ms: number
-      games_played: number
-    }>(
-      `SELECT
-         u.username,
-         u.display_name,
-         MIN(g.duration_ms)::int AS best_ms,
-         COUNT(*)::int AS games_played
-       FROM games g
-       JOIN users u ON u.id = g.user_id
-       JOIN difficulty_presets d ON d.id = g.preset_id
-       WHERE g.status = 'won' AND d.slug = $1
-       GROUP BY u.id
-       ORDER BY best_ms ASC
-       LIMIT 10`,
-      [difficulty],
-    )
-
-    return {
-      items: r.rows.map((row, index) => ({
-        rank: index + 1,
-        username: row.username,
-        displayName: row.display_name,
-        bestMs: row.best_ms,
-        gamesPlayed: row.games_played,
-      })),
-    }
-  })
+    },
+  )
 
   app.post<{ Body: SubmitBody }>('/api/games', async (req, reply) => {
     const user = await getUserFromRequest(req)

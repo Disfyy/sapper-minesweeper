@@ -4,19 +4,21 @@
   flex-direction: column;
 }
 
-.nav {
+/* ============== Top utility bar (always visible) ============== */
+
+.topBar {
   display: flex;
   align-items: center;
-  gap: 22px;
-  flex-wrap: wrap;
-  padding: 12px 22px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 20px;
   border-bottom: 1px solid var(--nav-border);
   background: var(--nav-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 12;
 }
 
 .brand {
@@ -42,69 +44,202 @@
   -webkit-text-fill-color: transparent;
 }
 
-.links {
+.topRight {
   display: flex;
   align-items: center;
-  gap: 18px;
-  flex-wrap: wrap;
-  flex: 1 1 auto;
+  gap: 8px;
 }
 
-.link {
-  color: var(--page-fg-muted);
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 500;
-  padding: 4px 0;
-  border-bottom: 2px solid transparent;
-  transition: color 120ms ease, border-color 120ms ease;
-}
-
-.link:hover {
-  color: var(--page-fg);
-}
-
-.active {
-  color: var(--page-fg);
-  border-bottom-color: var(--accent);
-}
-
-.right {
-  display: flex;
+.userPill {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.meta {
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--stat-bg);
+  border: 1px solid var(--stat-border);
   font-size: 13px;
-  color: var(--page-fg-muted);
-  max-width: 240px;
+  color: var(--page-fg);
+}
+
+.userName {
+  max-width: 160px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.coins {
+  font-weight: 600;
+  color: var(--page-fg-muted);
+}
+
 .proCrown {
-  margin-right: 4px;
   filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6));
+}
+
+/* ============== Body (sidebar + main) ============== */
+
+.body {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: stretch;
+  min-height: 0;
+}
+
+.sidebar {
+  width: 232px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--nav-border);
+  background: var(--nav-bg);
+  padding: 16px 12px;
+  position: sticky;
+  top: 56px; /* below topBar */
+  align-self: flex-start;
+  height: calc(100dvh - 56px);
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 auto;
+}
+
+.sideLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--page-fg-muted);
+  text-decoration: none;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.sideLink:hover {
+  color: var(--page-fg);
+  background: var(--surface-1);
+}
+
+.sideLinkActive {
+  color: var(--page-fg);
+  background: var(--accent-soft);
+  font-weight: 600;
+}
+
+.sideIcon {
+  font-size: 18px;
+  display: inline-flex;
+  width: 24px;
+  justify-content: center;
+}
+
+.sideLabel {
+  flex: 1 1 auto;
+}
+
+.sidebarFoot {
+  border-top: 1px solid var(--nav-border);
+  padding-top: 10px;
 }
 
 .main {
   flex: 1 1 auto;
+  min-width: 0;
 }
 
-@media (max-width: 640px) {
-  .nav {
-    padding: 10px 14px;
-    gap: 12px;
+/* ============== Mobile bottom tab bar (hidden on desktop) ============== */
+
+.bottomTabs {
+  display: none;
+}
+
+/* ============== Responsive ============== */
+
+@media (max-width: 1023px) {
+  /* Collapse sidebar to icons-only on tablet. */
+  .sidebar {
+    width: 72px;
+    padding: 12px 6px;
   }
-  .links {
-    gap: 12px;
-    order: 3;
-    flex-basis: 100%;
+  .sideLink {
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 6px;
+    font-size: 11px;
   }
-  .meta {
-    max-width: 140px;
+  .sideLabel {
+    font-size: 10px;
+    text-align: center;
+  }
+  .userName {
+    max-width: 110px;
+  }
+}
+
+@media (max-width: 720px) {
+  /* Phone: drop the sidebar, use bottom tabs. */
+  .sidebar {
+    display: none;
+  }
+  .topBar {
+    padding: 8px 14px;
+  }
+  .userPill {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .userName {
+    max-width: 80px;
+  }
+  .main {
+    padding-bottom: 76px; /* leave room for bottom tabs */
+  }
+  .bottomTabs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--nav-bg);
+    border-top: 1px solid var(--nav-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 6px 4px max(6px, env(safe-area-inset-bottom));
+    z-index: 11;
+  }
+  .tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 4px;
+    color: var(--page-fg-muted);
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 11px;
+  }
+  .tab:hover {
+    color: var(--page-fg);
+  }
+  .tabActive {
+    color: var(--page-fg);
+    background: var(--accent-soft);
+    font-weight: 600;
+  }
+  .tabIcon {
+    font-size: 20px;
+  }
+  .tabLabel {
+    font-size: 10px;
   }
 }

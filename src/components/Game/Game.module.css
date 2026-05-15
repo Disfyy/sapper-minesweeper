@@ -106,6 +106,60 @@
   line-height: 1.5;
 }
 
+.coachStrip {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--stat-border);
+  background: var(--stat-bg);
+  font-size: 13px;
+  line-height: 1.5;
+  animation: bannerIn 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.coachLabel {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--page-fg-muted);
+}
+
+.coachList {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shortcutsDetails {
+  border: 1px solid var(--stat-border);
+  border-radius: 10px;
+  padding: 6px 12px;
+  background: var(--surface-1);
+  font-size: 12px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.shortcutsSummary {
+  cursor: pointer;
+  color: var(--page-fg-muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  user-select: none;
+}
+
+.shortcutsSummary:hover {
+  color: var(--page-fg);
+}
+
+.shortcutsDetails[open] .shortcutsSummary {
+  color: var(--page-fg);
+}
+
 .kbd {
   display: inline-block;
   padding: 1px 6px;
