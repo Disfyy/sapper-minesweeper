@@ -8,9 +8,9 @@
 }
 
 .inner {
-  display: inline-block;
+  display: block;
+  width: min(100%, calc(var(--cols, 9) * 48px));
   min-width: min(100%, calc(var(--cols, 9) * 36px));
-  max-width: calc(var(--cols, 9) * 48px);
   background: var(--google-board-covered-a);
 }
 
@@ -37,8 +37,8 @@
 
 @media (max-width: 520px) {
   .inner {
+    width: min(100%, calc(var(--cols, 9) * 40px));
     min-width: min(100%, calc(var(--cols, 9) * 28px));
-    max-width: calc(var(--cols, 9) * 40px);
   }
   .grid {
     grid-template-columns: repeat(var(--cols, 9), minmax(26px, 1fr));
