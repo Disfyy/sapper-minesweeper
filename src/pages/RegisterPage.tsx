@@ -14,6 +14,7 @@ export function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
+  const [city, setCity] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
 
@@ -22,7 +23,12 @@ export function RegisterPage() {
     setError(null)
     setPending(true)
     try {
-      await register({ email, password, displayName: displayName || undefined })
+      await register({
+        email,
+        password,
+        displayName: displayName || undefined,
+        city: city || undefined,
+      })
       await refresh()
       nav('/')
     } catch (err) {
@@ -59,6 +65,15 @@ export function RegisterPage() {
           type="text"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
+        />
+        <Input
+          label={t('cityOptional')}
+          hint={t('cityHint')}
+          placeholder={t('cityPlaceholder')}
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          maxLength={64}
         />
         {error && <p className={styles.error}>{error}</p>}
         <Button type="submit" variant="primary" size="lg" disabled={pending} fullWidth>

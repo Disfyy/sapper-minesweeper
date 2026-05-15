@@ -3,6 +3,7 @@ const base = () => import.meta.env.VITE_API_URL ?? 'http://localhost:3001'
 export type MeResponse = {
   email: string
   displayName: string | null
+  city: string | null
   coins: number
   equippedThemeId: number | null
   equippedThemeSlug: string
@@ -63,9 +64,19 @@ export async function register(body: {
   email: string
   password: string
   displayName?: string
+  city?: string
 }): Promise<void> {
   const res = await apiFetch('/api/auth/register', { method: 'POST', body: JSON.stringify(body) })
   if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Registration failed'))
+}
+
+export async function updateCity(city: string | null): Promise<{ city: string | null }> {
+  const res = await apiFetch('/api/me/city', {
+    method: 'PATCH',
+    body: JSON.stringify({ city }),
+  })
+  if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Failed to update city'))
+  return parseJson<{ city: string | null }>(res)
 }
 
 export async function login(body: { email: string; password: string }): Promise<void> {
@@ -131,6 +142,7 @@ export type LeaderboardEntry = {
   rank: number
   username: string | null
   displayName: string | null
+  city: string | null
   /** Best clearing time in ms — present for time-ranked modes; for speed it may be null if user never won. */
   bestMs: number | null
   /** Speed-mode only: best score (cells × 10 + leftover-time bonus). */
@@ -140,12 +152,23 @@ export type LeaderboardEntry = {
 
 export async function fetchLeaderboard(
   difficulty: LeaderboardDifficulty,
+  city?: string | null,
 ): Promise<LeaderboardEntry[]> {
   const params = new URLSearchParams({ difficulty })
+  if (city) params.set('city', city)
   const res = await apiFetch(`/api/leaderboard?${params.toString()}`)
   if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Failed to load leaderboard'))
   const j = await parseJson<{ items: LeaderboardEntry[] }>(res)
   return j.items
+}
+
+export type LeaderboardCity = { city: string; playerCount: number }
+
+export async function fetchLeaderboardCities(): Promise<LeaderboardCity[]> {
+  const res = await apiFetch('/api/leaderboard/cities')
+  if (!res.ok) throw new Error(await readApiErrorMessage(res, 'Failed to load cities'))
+  const j = await parseJson<{ cities: LeaderboardCity[] }>(res)
+  return j.cities
 }
 
 export type GameMove = { a: 'r' | 'f' | 'c'; r: number; c: number; t: number }

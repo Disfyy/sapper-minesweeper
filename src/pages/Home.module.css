@@ -1,0 +1,168 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 20px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+
+/* ============== Hero ============== */
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 48px 20px 32px;
+  border-radius: 24px;
+  background: var(--surface-1);
+  border: 1px solid var(--stat-border);
+  box-shadow: 0 30px 80px -50px rgba(0, 0, 0, 0.5);
+}
+
+.eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--page-fg-muted);
+  font-weight: 600;
+}
+
+.title {
+  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin: 4px 0 0;
+  color: var(--page-fg);
+}
+
+.tagline {
+  max-width: 56ch;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--page-fg-muted);
+  margin: 4px 0 0;
+}
+
+.heroActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.primaryLink,
+.secondaryLink {
+  text-decoration: none;
+}
+
+.trust {
+  font-size: 12px;
+  color: var(--page-fg-dim);
+  margin-top: 8px;
+}
+
+/* ============== Modes grid ============== */
+
+.modesSection {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--page-fg);
+  margin: 0;
+}
+
+.modeGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.modeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 16px;
+  background: var(--surface-1);
+  border: 1px solid var(--stat-border);
+  text-decoration: none;
+  color: var(--page-fg);
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+}
+
+.modeCard:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+.modeCard:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.modeEmoji {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.modeTitle {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+
+.modeBody {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--page-fg-muted);
+}
+
+/* ============== Signup banner ============== */
+
+.signupBanner {
+  padding: 16px 20px;
+  border-radius: 14px;
+  background: var(--accent-soft);
+  border: 1px solid var(--stat-border);
+  font-size: 14px;
+  text-align: center;
+  color: var(--page-fg);
+}
+
+.signupBanner a {
+  color: var(--accent-strong);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+/* ============== Responsive ============== */
+
+@media (max-width: 900px) {
+  .modeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 24px 14px 48px;
+    gap: 32px;
+  }
+  .hero {
+    padding: 32px 16px 24px;
+  }
+  .modeGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -9,6 +9,7 @@ import { registerDailyRoutes } from './routes/daily.js'
 import { registerGameRoutes } from './routes/games.js'
 import {
   getUserFromRequest,
+  normalizeCity,
   WIN_COINS,
   WIN_DAILY_CAP,
   WIN_MIN_INTERVAL_MS,
@@ -53,11 +54,12 @@ app.register(cors, {
 app.get('/api/health', async () => ({ ok: true }))
 
 app.post<{
-  Body: { email?: string; password?: string; displayName?: string }
+  Body: { email?: string; password?: string; displayName?: string; city?: string }
 }>('/api/auth/register', async (req, reply) => {
   const email = req.body?.email?.trim().toLowerCase()
   const password = req.body?.password ?? ''
   const displayName = req.body?.displayName?.trim() || null
+  const city = normalizeCity(req.body?.city)
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return reply.status(400).send({ error: 'Invalid email' })
@@ -79,10 +81,10 @@ app.post<{
   let userId: string
   try {
     const ins = await pool.query<{ id: string }>(
-      `INSERT INTO users (email, password_hash, display_name, coins, equipped_theme_id)
-       VALUES ($1, $2, $3, 500, $4)
+      `INSERT INTO users (email, password_hash, display_name, city, coins, equipped_theme_id)
+       VALUES ($1, $2, $3, $4, 500, $5)
        RETURNING id`,
-      [email, hash, displayName, defaultThemeId],
+      [email, hash, displayName, city, defaultThemeId],
     )
     userId = ins.rows[0]!.id
   } catch (e: unknown) {
@@ -149,12 +151,35 @@ app.get('/api/me', async (req, reply) => {
   return {
     email: user.email,
     displayName: user.display_name,
+    city: user.city,
     coins: user.coins,
     equippedThemeId: user.equipped_theme_id,
     equippedThemeSlug: user.equipped_slug ?? 'default',
     ownedThemeIds,
     isPro: user.is_pro,
   }
+})
+
+app.patch<{ Body: { city?: string | null } }>('/api/me/city', async (req, reply) => {
+  const user = await getUserFromRequest(req)
+  if (!user) return reply.status(401).send({ error: 'Unauthorized' })
+
+  const city = req.body?.city === null ? null : normalizeCity(req.body?.city)
+  await pool.query(`UPDATE users SET city = $1 WHERE id = $2`, [city, user.id])
+  return { ok: true, city }
+})
+
+app.get('/api/leaderboard/cities', async () => {
+  const r = await pool.query<{ city: string; player_count: number }>(
+    `SELECT u.city, COUNT(*)::int AS player_count
+     FROM users u
+     JOIN games g ON g.user_id = u.id
+     WHERE u.city IS NOT NULL AND u.city <> ''
+     GROUP BY u.city
+     ORDER BY player_count DESC, u.city ASC
+     LIMIT 30`,
+  )
+  return { cities: r.rows.map((row) => ({ city: row.city, playerCount: row.player_count })) }
 })
 
 app.get('/api/me/stats', async (req, reply) => {

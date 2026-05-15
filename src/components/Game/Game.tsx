@@ -3,13 +3,19 @@ import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { playSound } from '../../audio/playSound'
 import { submitGame, type SubmitGameInput, type SubmitGameResult } from '../../api/client'
-import { computeMineProbabilities, type CoachHint } from '../../game/coach'
+import {
+  computeMineProbabilities,
+  type CoachHint,
+  type CoachPick,
+  type CoachReason,
+} from '../../game/coach'
 import { gameReducer, getElapsedSeconds } from '../../game/game'
 import { createInitialState } from '../../game/state'
 import { useFlagMode } from '../../game/useFlagMode'
 import type { Cell, Difficulty } from '../../game/types'
 import { SPEED_TIME_LIMIT_MS } from '../../game/types'
 import { useLanguage } from '../../i18n/languageContext'
+import type { TranslationKey } from '../../i18n/translations'
 import { Button } from '../../ui/Button/Button'
 import { Board } from '../Board/Board'
 import { Confetti } from './Confetti'
@@ -48,6 +54,7 @@ export function Game(props: GameProps) {
   const HINTS_PER_GAME = 3
   const [hintsLeft, setHintsLeft] = useState(HINTS_PER_GAME)
   const [hintCells, setHintCells] = useState<CoachHint | null>(null)
+  const [hintExplanations, setHintExplanations] = useState<string[]>([])
   const hintTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -149,12 +156,43 @@ export function Game(props: GameProps) {
     lastSubmittedEndMs.current = null
     setHintsLeft(HINTS_PER_GAME)
     setHintCells(null)
+    setHintExplanations([])
     if (hintTimerRef.current) window.clearTimeout(hintTimerRef.current)
     hintTimerRef.current = null
   }
 
   const canUseHint =
     !isSpeedMode && !hintsDisabled && state.status === 'playing' && hintsLeft > 0
+
+  const reasonKeyMap: Record<CoachReason['kind'], TranslationKey> = {
+    allMinesFlagged: 'coachReasonAllMinesFlagged',
+    allCoveredAreMines: 'coachReasonAllCoveredAreMines',
+    lowLocalProb: 'coachReasonLowLocalProb',
+    highLocalProb: 'coachReasonHighLocalProb',
+    globalDensity: 'coachReasonGlobalDensity',
+  }
+
+  const cellLabel = (row: number, col: number) => `(${row + 1}, ${col + 1})`
+
+  const buildExplanation = (pick: CoachPick, prefixKey: TranslationKey): string => {
+    const prefix = t(prefixKey, { cell: cellLabel(pick.row, pick.col) })
+    const reason = pick.reason
+    const reasonKey = reasonKeyMap[reason.kind]
+    if (reason.kind === 'globalDensity') {
+      return `${prefix}. ${t(reasonKey)}`
+    }
+    const needed =
+      reason.srcNumber !== undefined && reason.flagsAdj !== undefined
+        ? Math.max(0, reason.srcNumber - reason.flagsAdj)
+        : 0
+    return `${prefix}. ${t(reasonKey, {
+      src: cellLabel(reason.srcRow ?? 0, reason.srcCol ?? 0),
+      srcNumber: reason.srcNumber ?? 0,
+      flagsAdj: reason.flagsAdj ?? 0,
+      coveredAdj: reason.coveredAdj ?? 0,
+      needed,
+    })}`
+  }
 
   const onHint = () => {
     if (!canUseHint) return
@@ -165,13 +203,18 @@ export function Game(props: GameProps) {
     )
     if (!hint.safe && !hint.mine) return
     setHintCells(hint)
+    const lines: string[] = []
+    if (hint.safe) lines.push(buildExplanation(hint.safe, 'coachSafePrefix'))
+    if (hint.mine) lines.push(buildExplanation(hint.mine, 'coachMinePrefix'))
+    setHintExplanations(lines)
     setHintsLeft((n) => n - 1)
     playSound('click')
     if (hintTimerRef.current) window.clearTimeout(hintTimerRef.current)
     hintTimerRef.current = window.setTimeout(() => {
       setHintCells(null)
+      setHintExplanations([])
       hintTimerRef.current = null
-    }, 3500)
+    }, 8000)
   }
 
   useEffect(() => {
@@ -212,10 +255,13 @@ export function Game(props: GameProps) {
         </div>
 
         <div className={styles.stats}>
-          <div className={styles.stat}>
-            <div className={styles.statLabel}>{t('status')}</div>
-            <div className={styles.statValue}>{statusLabel}</div>
-          </div>
+          {/* "Status" stat only matters when the game is over — the win/loss banner already shows it. Hide during play to reduce noise. */}
+          {finished && (
+            <div className={styles.stat}>
+              <div className={styles.statLabel}>{t('status')}</div>
+              <div className={styles.statValue}>{statusLabel}</div>
+            </div>
+          )}
           <div className={styles.stat}>
             <div className={styles.statLabel}>{isSpeedMode ? t('timeLeft') : t('time')}</div>
             <div
@@ -306,14 +352,28 @@ export function Game(props: GameProps) {
 
         {state.status === 'won' && <Confetti />}
 
-        <div className={styles.hint}>
-          {t('clickTo')} {flagMode ? t('plantFlag') : t('reveal')} •{' '}
-          {t('rightClickFlags')} •{' '}
-          <span className={styles.kbd}>T</span> {t('togglesMode')} •{' '}
-          <span className={styles.kbd}>F</span> {t('flagsFocusedCell')} •{' '}
-          <span className={styles.kbd}>C</span> {t('chords')} •{' '}
-          {t('keyboardPlay', { enter: 'Enter' })}
-        </div>
+        {hintExplanations.length > 0 && (
+          <div className={styles.coachStrip} role="status">
+            <strong className={styles.coachLabel}>💡 {t('coachLabel')}</strong>
+            <ul className={styles.coachList}>
+              {hintExplanations.map((line, idx) => (
+                <li key={idx}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <details className={styles.shortcutsDetails}>
+          <summary className={styles.shortcutsSummary}>? {t('shortcuts')}</summary>
+          <div className={styles.hint}>
+            {t('clickTo')} {flagMode ? t('plantFlag') : t('reveal')} •{' '}
+            {t('rightClickFlags')} •{' '}
+            <span className={styles.kbd}>T</span> {t('togglesMode')} •{' '}
+            <span className={styles.kbd}>F</span> {t('flagsFocusedCell')} •{' '}
+            <span className={styles.kbd}>C</span> {t('chords')} •{' '}
+            {t('keyboardPlay', { enter: 'Enter' })}
+          </div>
+        </details>
       </main>
     </div>
   )

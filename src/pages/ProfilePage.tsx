@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEventHandler } from 'react'
 import { Link } from 'react-router-dom'
 import {
   equipTheme,
   getMarketThemes,
   getMyStats,
+  updateCity,
   type MarketTheme,
   type UserStats,
 } from '../api/client'
@@ -11,6 +12,7 @@ import { useAuth } from '../auth/useAuth'
 import { useLanguage } from '../i18n/languageContext'
 import { Button } from '../ui/Button/Button'
 import { Card } from '../ui/Card/Card'
+import { Input } from '../ui/Input/Input'
 import styles from './Pages.module.css'
 
 function formatBest(ms: number | null): string {
@@ -28,6 +30,30 @@ export function ProfilePage() {
   const [themes, setThemes] = useState<MarketTheme[]>([])
   const [err, setErr] = useState<string | null>(null)
   const [busyId, setBusyId] = useState<number | null>(null)
+  const [cityDraft, setCityDraft] = useState('')
+  const [citySaving, setCitySaving] = useState(false)
+  const [citySaved, setCitySaved] = useState(false)
+
+  useEffect(() => {
+    setCityDraft(user?.city ?? '')
+  }, [user?.city])
+
+  const onSaveCity: FormEventHandler = async (e) => {
+    e.preventDefault()
+    setCitySaving(true)
+    setCitySaved(false)
+    setErr(null)
+    try {
+      const trimmed = cityDraft.trim()
+      await updateCity(trimmed || null)
+      await refresh()
+      setCitySaved(true)
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : t('failedLoadProfile'))
+    } finally {
+      setCitySaving(false)
+    }
+  }
 
   useEffect(() => {
     if (!user) return
@@ -112,6 +138,25 @@ export function ProfilePage() {
             <div className={styles.statValue}>{formatBest(stats?.bestTimeExpertMs ?? null)}</div>
           </div>
         </div>
+      </Card>
+
+      <Card title={t('locationCard')} subtitle={t('locationCardSubtitle')}>
+        <form className={styles.form} onSubmit={onSaveCity}>
+          <Input
+            label={t('cityOptional')}
+            hint={t('cityHint')}
+            placeholder={t('cityPlaceholder')}
+            value={cityDraft}
+            onChange={(e) => setCityDraft(e.target.value)}
+            maxLength={64}
+          />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Button type="submit" variant="primary" size="sm" disabled={citySaving}>
+              {citySaving ? t('creating') : t('saveCity')}
+            </Button>
+            {citySaved && <span className={styles.muted}>{t('cityUpdated')}</span>}
+          </div>
+        </form>
       </Card>
 
       <Card
