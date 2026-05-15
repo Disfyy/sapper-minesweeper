@@ -1,13 +1,15 @@
 .cell {
+  position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   min-width: 28px;
-  border-radius: 10px;
-  border: 1px solid var(--cell-border);
-  background: var(--cell-covered-bg);
+  border: 0;
+  border-radius: 0;
+  background: var(--google-board-covered-a);
   color: var(--cell-text);
-  font-weight: 800;
-  font-size: clamp(13px, 2.2vw, 17px);
+  font-weight: 900;
+  font-size: clamp(15px, 2.6vw, 22px);
+  line-height: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -15,72 +17,103 @@
   cursor: pointer;
   padding: 0;
   transition:
-    background 140ms ease,
-    transform 90ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease;
+    background 100ms ease,
+    filter 100ms ease;
 }
 
-.cell:hover {
-  background: var(--cell-covered-hover);
-  transform: translateY(-1px);
+.cell:focus-visible {
+  outline: none;
 }
 
-.cell:active {
-  transform: translateY(1px);
-  filter: brightness(0.96);
+.iconSvg {
+  width: 62%;
+  height: 62%;
+  display: block;
 }
 
-.covered {
-  box-shadow: var(--cell-inset-shadow), var(--cell-shadow);
+/* Covered tiles — green checkerboard */
+.covered.parityA {
+  background: var(--google-board-covered-a);
+}
+.covered.parityB {
+  background: var(--google-board-covered-b);
 }
 
+.covered:hover {
+  background: var(--google-board-covered-hover);
+}
+
+.covered:active {
+  filter: brightness(0.95);
+}
+
+/* Revealed tiles — tan checkerboard with stepped green edge on boundary */
 .revealed {
-  background: var(--cell-revealed-bg);
-  border-color: var(--cell-revealed-border);
   cursor: default;
-  box-shadow: none;
-  animation: revealPop 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: revealFade 100ms ease both;
+  /* Stepped Google-style outline: only the sides where neighbor is covered
+     (set via --edge-{t,r,b,l} from the React layer) draw a green inset border. */
+  box-shadow:
+    inset 0 calc(var(--edge-t, 0) * 3px) 0 0 var(--google-board-edge),
+    inset calc(var(--edge-r, 0) * -3px) 0 0 0 var(--google-board-edge),
+    inset 0 calc(var(--edge-b, 0) * -3px) 0 0 var(--google-board-edge),
+    inset calc(var(--edge-l, 0) * 3px) 0 0 0 var(--google-board-edge);
+}
+
+.revealed.parityA {
+  background: var(--google-board-revealed-a);
+}
+.revealed.parityB {
+  background: var(--google-board-revealed-b);
 }
 
 .revealed:hover {
-  background: var(--cell-revealed-bg);
-  transform: none;
+  filter: none;
 }
 
+.revealed:active {
+  filter: none;
+}
+
+/* Exploded mine — red flash background, edges still show */
 .exploded {
-  background: var(--exploded-bg);
-  border-color: var(--exploded-border);
-  animation: explode 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: var(--google-exploded-bg);
+  animation: explodeFlash 320ms ease both;
 }
 
+.exploded.parityA,
+.exploded.parityB {
+  background: var(--google-exploded-bg);
+}
+
+/* Focus — inset outline to avoid layout shift on borderless cells */
 .focused {
   outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
+  outline-offset: -2px;
   z-index: 1;
 }
 
-.flagModeHint {
-  position: relative;
-}
-
+/* Flag-mode hover hint — ghost flag SVG via mask trick is overkill; opacity emoji is fine
+   as a hover preview only (purely visual cue, no semantic content). */
 .flagModeHint::after {
-  content: '🚩';
+  content: '⚑';
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9em;
+  font-size: 1.1em;
+  color: #ea4335;
   opacity: 0;
   pointer-events: none;
   transition: opacity 120ms ease;
 }
 
 .flagModeHint.covered:hover::after {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
+/* Number colors — Google-style bold digits */
 .n1 {
   color: var(--n1);
 }
@@ -106,69 +139,53 @@
   color: var(--n8);
 }
 
-@keyframes revealPop {
-  0% {
-    transform: scale(0.85);
+@keyframes revealFade {
+  from {
     opacity: 0.4;
   }
-  100% {
-    transform: scale(1);
+  to {
     opacity: 1;
   }
 }
 
-@keyframes explode {
+@keyframes explodeFlash {
   0% {
-    transform: scale(1);
-  }
-  20% {
-    transform: scale(1.18);
-  }
-  40% {
-    transform: scale(0.92) translateX(-2px);
-  }
-  60% {
-    transform: scale(1.06) translateX(2px);
-  }
-  80% {
-    transform: scale(0.98) translateX(-1px);
+    filter: brightness(1.6);
   }
   100% {
-    transform: scale(1);
+    filter: brightness(1);
   }
 }
 
 .hintSafe {
   outline: 2px solid #22c55e;
-  outline-offset: 2px;
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.65);
+  outline-offset: -2px;
   animation: hintPulseSafe 1s ease-in-out infinite alternate;
   z-index: 1;
 }
 
 .hintMine {
   outline: 2px solid #ef4444;
-  outline-offset: 2px;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.7);
+  outline-offset: -2px;
   animation: hintPulseMine 1s ease-in-out infinite alternate;
   z-index: 1;
 }
 
 @keyframes hintPulseSafe {
   from {
-    box-shadow: 0 0 6px rgba(34, 197, 94, 0.45);
+    box-shadow: inset 0 0 0 0 rgba(34, 197, 94, 0.0);
   }
   to {
-    box-shadow: 0 0 18px rgba(34, 197, 94, 0.85);
+    box-shadow: inset 0 0 0 6px rgba(34, 197, 94, 0.35);
   }
 }
 
 @keyframes hintPulseMine {
   from {
-    box-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+    box-shadow: inset 0 0 0 0 rgba(239, 68, 68, 0.0);
   }
   to {
-    box-shadow: 0 0 20px rgba(239, 68, 68, 0.95);
+    box-shadow: inset 0 0 0 6px rgba(239, 68, 68, 0.4);
   }
 }
 
@@ -182,6 +199,6 @@
     animation: none;
   }
   .cell {
-    transition: background 0s, border-color 0s;
+    transition: background 0s;
   }
 }

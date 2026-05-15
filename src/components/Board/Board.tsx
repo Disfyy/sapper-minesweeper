@@ -7,6 +7,14 @@ import styles from './Board.module.css'
 
 type Focus = { row: number; col: number }
 
+function isCoveredNeighbor(board: Cell[][], r: number, c: number): boolean {
+  const row = board[r]
+  if (!row) return true
+  const n = row[c]
+  if (!n) return true
+  return n.state !== 'revealed' || n.isMine
+}
+
 export function Board(props: {
   board: Cell[][]
   status: GameStatus
@@ -85,6 +93,15 @@ export function Board(props: {
               const mineHit =
                 props.hintCells?.mine?.row === r && props.hintCells?.mine?.col === c
               const hint = safeHit ? 'safe' : mineHit ? 'mine' : undefined
+              const edges =
+                cell.state === 'revealed' && !cell.isMine
+                  ? {
+                      top: isCoveredNeighbor(props.board, r - 1, c),
+                      right: isCoveredNeighbor(props.board, r, c + 1),
+                      bottom: isCoveredNeighbor(props.board, r + 1, c),
+                      left: isCoveredNeighbor(props.board, r, c - 1),
+                    }
+                  : undefined
               return (
                 <CellView
                   key={`${r}-${c}`}
@@ -94,6 +111,7 @@ export function Board(props: {
                   tabIndex={props.focus.row === r && props.focus.col === c ? 0 : -1}
                   flagMode={props.flagMode}
                   hint={hint}
+                  edges={edges}
                   onFocus={() => props.setFocus({ row: r, col: c })}
                   onReveal={() => props.onReveal(cell)}
                   onToggleFlag={() => props.onToggleFlag(cell)}
