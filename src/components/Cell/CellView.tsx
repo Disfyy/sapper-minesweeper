@@ -2,7 +2,17 @@ import { useRef } from 'react'
 import type { Cell, GameStatus } from '../../game/types'
 import { useLanguage } from '../../i18n/languageContext'
 import type { TranslationKey } from '../../i18n/translations'
+import { FlagIcon } from './icons/FlagIcon'
+import { MineIcon } from './icons/MineIcon'
+import { WrongFlagIcon } from './icons/WrongFlagIcon'
 import styles from './CellView.module.css'
+
+export type CellEdges = {
+  top: boolean
+  right: boolean
+  bottom: boolean
+  left: boolean
+}
 
 function numberClass(n: number): string {
   if (n === 1) return styles.n1
@@ -44,13 +54,14 @@ export function CellView(props: {
   tabIndex: number
   flagMode?: boolean
   hint?: 'safe' | 'mine'
+  edges?: CellEdges
   onFocus: () => void
   onReveal: () => void
   onToggleFlag: () => void
   onChord?: () => void
 }) {
   const { t } = useLanguage()
-  const { cell, flagMode, hint } = props
+  const { cell, flagMode, hint, edges } = props
   const revealOnEnd = props.gameStatus === 'lost' || props.gameStatus === 'won'
   const longPressTimerRef = useRef<number | null>(null)
   const longPressTriggeredRef = useRef(false)
@@ -59,17 +70,23 @@ export function CellView(props: {
   const showsWrongFlag = revealOnEnd && cell.state === 'flagged' && !cell.isMine
 
   let content: React.ReactNode = null
-  if (showsMine) content = '💣'
-  else if (showsWrongFlag) content = '✖'
-  else if (cell.state === 'flagged') content = '🚩'
-  else if (cell.state === 'revealed' && !cell.isMine && cell.adjacentMines > 0)
+  let numberValue: number | null = null
+  if (showsMine) content = <MineIcon className={styles.iconSvg} />
+  else if (showsWrongFlag) content = <WrongFlagIcon className={styles.iconSvg} />
+  else if (cell.state === 'flagged') content = <FlagIcon className={styles.iconSvg} />
+  else if (cell.state === 'revealed' && !cell.isMine && cell.adjacentMines > 0) {
+    numberValue = cell.adjacentMines
     content = cell.adjacentMines
+  }
+
+  const parityClass = (cell.row + cell.col) % 2 === 0 ? styles.parityA : styles.parityB
 
   const classNames = [
     styles.cell,
     cell.state === 'revealed' ? styles.revealed : styles.covered,
+    parityClass,
     showsMine && cell.exploded ? styles.exploded : '',
-    content && typeof content === 'number' ? numberClass(content) : '',
+    numberValue !== null ? numberClass(numberValue) : '',
     props.isFocused ? styles.focused : '',
     flagMode && cell.state === 'covered' && !showsMine ? styles.flagModeHint : '',
     hint === 'safe' ? styles.hintSafe : '',
@@ -118,6 +135,15 @@ export function CellView(props: {
     longPressTimerRef.current = null
   }
 
+  const cellStyle: React.CSSProperties & Record<string, string | number> = {
+    '--r': cell.row,
+    '--c': cell.col,
+    '--edge-t': edges?.top ? 1 : 0,
+    '--edge-r': edges?.right ? 1 : 0,
+    '--edge-b': edges?.bottom ? 1 : 0,
+    '--edge-l': edges?.left ? 1 : 0,
+  }
+
   return (
     <button
       type="button"
@@ -131,7 +157,7 @@ export function CellView(props: {
       onFocus={props.onFocus}
       tabIndex={props.tabIndex}
       aria-label={ariaLabelFor(cell, props.gameStatus, t)}
-      style={{ '--r': cell.row, '--c': cell.col } as React.CSSProperties}
+      style={cellStyle}
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUpCancel}
       onPointerCancel={onPointerUpCancel}

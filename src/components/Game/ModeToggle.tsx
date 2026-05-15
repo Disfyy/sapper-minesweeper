@@ -1,4 +1,5 @@
 import { useLanguage } from '../../i18n/languageContext'
+import { FlagIcon } from '../Cell/icons/FlagIcon'
 import styles from './ModeToggle.module.css'
 
 export function ModeToggle(props: { flagMode: boolean; onChange: (v: boolean) => void }) {
@@ -13,11 +14,19 @@ export function ModeToggle(props: { flagMode: boolean; onChange: (v: boolean) =>
         className={`${styles.option} ${!flagMode ? styles.active : ''}`}
         onClick={() => onChange(false)}
         title={t('revealModeTitle')}
+        aria-label={t('revealLabel')}
       >
-        <span className={styles.icon} aria-hidden="true">
-          💣
-        </span>
-        <span className={styles.label}>{t('revealLabel')}</span>
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          focusable="false"
+          className={styles.icon}
+        >
+          <path
+            d="M12 4l-2 4h-3l3 3-1 4 3-2 3 2-1-4 3-3h-3z"
+            fill="currentColor"
+          />
+        </svg>
       </button>
       <button
         type="button"
@@ -26,11 +35,9 @@ export function ModeToggle(props: { flagMode: boolean; onChange: (v: boolean) =>
         className={`${styles.option} ${flagMode ? styles.active : ''}`}
         onClick={() => onChange(true)}
         title={t('flagModeTitle')}
+        aria-label={t('flagLabel')}
       >
-        <span className={styles.icon} aria-hidden="true">
-          🚩
-        </span>
-        <span className={styles.label}>{t('flagLabel')}</span>
+        <FlagIcon className={styles.icon} />
       </button>
     </div>
   )
