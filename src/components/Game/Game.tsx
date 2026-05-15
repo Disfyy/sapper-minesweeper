@@ -18,6 +18,7 @@ import { useLanguage } from '../../i18n/languageContext'
 import type { TranslationKey } from '../../i18n/translations'
 import { Button } from '../../ui/Button/Button'
 import { Board } from '../Board/Board'
+import { FlagIcon } from '../Cell/icons/FlagIcon'
 import { Confetti } from './Confetti'
 import { ModeToggle } from './ModeToggle'
 import styles from './Game.module.css'
@@ -235,73 +236,87 @@ export function Game(props: GameProps) {
               ? 'speed'
               : 'custom')
     : t('custom')
-  const statusLabel =
-    state.status === 'won'
-      ? t('youWon')
-      : state.status === 'lost'
-        ? t('gameOver')
-        : state.status === 'ready'
-          ? t('ready')
-          : t('playing')
+  const timerSeconds = isSpeedMode ? Math.ceil(speedRemaining) : Math.floor(elapsedSeconds)
+  const timerDisplay = timerSeconds.toString().padStart(3, '0')
+  const minesDisplay = minesRemaining.toString().padStart(3, '0')
+  const timeLabel = isSpeedMode ? t('timeLeft') : t('time')
 
   return (
     <div className={styles.page}>
-      <header className={styles.header}>
-        <div className={styles.titleBlock}>
-          <div className={styles.title}>{difficultyLabel}</div>
-          <div className={styles.subtitle}>
-            {state.difficulty.rows}×{state.difficulty.cols}, {state.difficulty.mines} {t('mines')}
-          </div>
-        </div>
-
-        <div className={styles.stats}>
-          {/* "Status" stat only matters when the game is over — the win/loss banner already shows it. Hide during play to reduce noise. */}
-          {finished && (
-            <div className={styles.stat}>
-              <div className={styles.statLabel}>{t('status')}</div>
-              <div className={styles.statValue}>{statusLabel}</div>
-            </div>
-          )}
-          <div className={styles.stat}>
-            <div className={styles.statLabel}>{isSpeedMode ? t('timeLeft') : t('time')}</div>
-            <div
-              className={`${styles.statValue} ${speedDanger ? styles.statDanger : ''}`}
+      <header className={styles.topBar}>
+        <button
+          type="button"
+          className={styles.difficultyPill}
+          onClick={onChangeDifficulty}
+          disabled={!onChangeDifficulty}
+          title={onChangeDifficulty ? t('changeDifficulty') : difficultyLabel}
+        >
+          <span className={styles.difficultyLabel}>{difficultyLabel}</span>
+          {onChangeDifficulty && (
+            <svg
+              className={styles.chevron}
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
             >
-              {isSpeedMode
-                ? `${Math.ceil(speedRemaining).toString().padStart(2, '0')}s`
-                : `${elapsedSeconds.toFixed(1)}s`}
-            </div>
+              <path d="M7 10l5 5 5-5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+
+        <div className={styles.counters}>
+          <div className={styles.counter} aria-label={`${t('minesLeft')}: ${minesRemaining}`}>
+            <FlagIcon className={styles.counterIcon} />
+            <span className={styles.counterValue}>{minesDisplay}</span>
           </div>
-          <div className={styles.stat}>
-            <div className={styles.statLabel}>{t('score')}</div>
-            <div className={styles.statValue}>{state.score}</div>
-          </div>
-          <div className={styles.stat}>
-            <div className={styles.statLabel}>{t('minesLeft')}</div>
-            <div className={styles.statValue}>{minesRemaining}</div>
+          <div
+            className={`${styles.counter} ${speedDanger ? styles.counterDanger : ''}`}
+            aria-label={`${timeLabel}: ${timerSeconds}`}
+          >
+            <svg
+              className={styles.counterIcon}
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <circle cx="12" cy="13" r="8" fill="none" stroke="currentColor" strokeWidth="2" />
+              <path d="M12 13V8.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M12 13l3 2" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M9 3h6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+            <span className={styles.counterValue}>{timerDisplay}</span>
           </div>
         </div>
 
         <div className={styles.controls}>
           <ModeToggle flagMode={flagMode} onChange={setFlagMode} />
           {!isSpeedMode && !hintsDisabled && (
-            <Button
-              variant="secondary"
+            <button
+              type="button"
+              className={styles.iconBtn}
               onClick={onHint}
               disabled={!canUseHint}
               title={t('hintTitle')}
+              aria-label={`${t('hint')} (${hintsLeft})`}
             >
-              💡 {t('hint')} ({hintsLeft})
-            </Button>
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={styles.iconBtnSvg}>
+                <path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c1 1 1.5 2 1.5 3.5h5c0-1.5.5-2.5 1.5-3.5A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <span className={styles.iconBtnBadge}>{hintsLeft}</span>
+            </button>
           )}
-          <Button variant="secondary" onClick={onRestart}>
-            {t('restart')}
-          </Button>
-          {onChangeDifficulty && (
-            <Button variant="ghost" onClick={onChangeDifficulty}>
-              {t('changeDifficulty')}
-            </Button>
-          )}
+          <button
+            type="button"
+            className={styles.iconBtn}
+            onClick={onRestart}
+            title={t('restart')}
+            aria-label={t('restart')}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className={styles.iconBtnSvg}>
+              <path d="M20 12a8 8 0 1 1-2.3-5.6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <path d="M20 4v5h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
         </div>
       </header>
 
