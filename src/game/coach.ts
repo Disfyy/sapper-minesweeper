@@ -9,15 +9,13 @@ export type CoachReasonKind =
   | 'lowLocalProb'
   /** Constraint-implied probability — mine because driving cell shows high local mine ratio. */
   | 'highLocalProb'
-  /** No revealed-number neighbor; conclusion is global mine density only. */
-  | 'globalDensity'
 
 export type CoachReason = {
   kind: CoachReasonKind
-  /** The revealed numbered cell that drove the conclusion (omitted for globalDensity). */
+  /** The revealed numbered cell that drove the conclusion. */
   srcRow?: number
   srcCol?: number
-  /** The number shown on the source cell (omitted for globalDensity). */
+  /** The number shown on the source cell. */
   srcNumber?: number
   flagsAdj?: number
   coveredAdj?: number
@@ -93,13 +91,11 @@ function pickReasonForMine(constraint: Constraint): CoachReason {
  * already flagged, and U adjacent covered-non-flagged neighbors, every cell
  * in U gets a local probability (N - K) / U.length. We aggregate per covered
  * cell by max (used to pick the mine) and min (used to pick the safe cell)
- * AND remember which constraint produced the min/max so we can explain it.
+ * and remember which constraint produced the min/max so we can explain it.
+ * Covered cells away from revealed numbers are ignored so hints stay on the
+ * active frontier.
  */
-export function computeMineProbabilities(
-  board: Cell[][],
-  totalMines: number,
-  flagsPlaced: number,
-): CoachHint {
+export function computeMineProbabilities(board: Cell[][]): CoachHint {
   const rows = board.length
   const cols = board[0]?.length ?? 0
   if (rows === 0 || cols === 0) return { safe: null, mine: null }
@@ -114,13 +110,6 @@ export function computeMineProbabilities(
   )
 
   const inBounds = (r: number, c: number) => r >= 0 && r < rows && c >= 0 && c < cols
-
-  let coveredCount = 0
-  for (let r = 0; r < rows; r++) {
-    for (let c = 0; c < cols; c++) {
-      if (board[r]![c]!.state === 'covered') coveredCount++
-    }
-  }
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -165,12 +154,6 @@ export function computeMineProbabilities(
     }
   }
 
-  const unflaggedCovered = Math.max(0, coveredCount)
-  const fallback =
-    unflaggedCovered > 0
-      ? Math.max(0, Math.min(1, (totalMines - flagsPlaced) / unflaggedCovered))
-      : 0.5
-
   let safe: CoachPick | null = null
   let mine: CoachPick | null = null
 
@@ -178,24 +161,25 @@ export function computeMineProbabilities(
     for (let c = 0; c < cols; c++) {
       const cell = board[r]![c]!
       if (cell.state !== 'covered') continue
-      const minP = Number.isNaN(minProb[r]![c]!) ? fallback : minProb[r]![c]!
-      const maxP = Number.isNaN(maxProb[r]![c]!) ? fallback : maxProb[r]![c]!
+      const minP = minProb[r]![c]!
+      const maxP = maxProb[r]![c]!
+      if (Number.isNaN(minP) || Number.isNaN(maxP)) continue
       if (!safe || minP < safe.prob) {
-        const src = minSrc[r]![c]
+        const src = minSrc[r]![c]!
         safe = {
           row: r,
           col: c,
           prob: minP,
-          reason: src ? pickReasonForSafe(src) : { kind: 'globalDensity' },
+          reason: pickReasonForSafe(src),
         }
       }
       if (!mine || maxP > mine.prob) {
-        const src = maxSrc[r]![c]
+        const src = maxSrc[r]![c]!
         mine = {
           row: r,
           col: c,
           prob: maxP,
-          reason: src ? pickReasonForMine(src) : { kind: 'globalDensity' },
+          reason: pickReasonForMine(src),
         }
       }
     }
