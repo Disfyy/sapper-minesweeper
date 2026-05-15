@@ -170,7 +170,6 @@ export function Game(props: GameProps) {
     allCoveredAreMines: 'coachReasonAllCoveredAreMines',
     lowLocalProb: 'coachReasonLowLocalProb',
     highLocalProb: 'coachReasonHighLocalProb',
-    globalDensity: 'coachReasonGlobalDensity',
   }
 
   const cellLabel = (row: number, col: number) => `(${row + 1}, ${col + 1})`
@@ -179,9 +178,6 @@ export function Game(props: GameProps) {
     const prefix = t(prefixKey, { cell: cellLabel(pick.row, pick.col) })
     const reason = pick.reason
     const reasonKey = reasonKeyMap[reason.kind]
-    if (reason.kind === 'globalDensity') {
-      return `${prefix}. ${t(reasonKey)}`
-    }
     const needed =
       reason.srcNumber !== undefined && reason.flagsAdj !== undefined
         ? Math.max(0, reason.srcNumber - reason.flagsAdj)
@@ -197,11 +193,7 @@ export function Game(props: GameProps) {
 
   const onHint = () => {
     if (!canUseHint) return
-    const hint = computeMineProbabilities(
-      state.board,
-      state.difficulty.mines,
-      state.flagsPlaced,
-    )
+    const hint = computeMineProbabilities(state.board)
     if (!hint.safe && !hint.mine) return
     setHintCells(hint)
     const lines: string[] = []

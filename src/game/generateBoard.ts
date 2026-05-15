@@ -1,6 +1,8 @@
 import { createEmptyBoard, forEachNeighbor } from './board'
 import type { Cell, Difficulty } from './types'
 
+const FIRST_REVEAL_SAFE_RADIUS = 1
+
 function computeAdjacentMines(board: Cell[][]): void {
   for (const rowCells of board) {
     for (const cell of rowCells) {
@@ -17,6 +19,35 @@ function computeAdjacentMines(board: Cell[][]): void {
   }
 }
 
+function createFirstRevealSafeZone(
+  difficulty: Difficulty,
+  safeRow: number,
+  safeCol: number,
+): Set<number> {
+  const totalCells = difficulty.rows * difficulty.cols
+  const maxSafeCells = Math.max(1, totalCells - difficulty.mines)
+  const safeIndices = new Set<number>()
+
+  const addIfAvailable = (row: number, col: number) => {
+    if (safeIndices.size >= maxSafeCells) return
+    if (row < 0 || col < 0 || row >= difficulty.rows || col >= difficulty.cols) return
+    safeIndices.add(row * difficulty.cols + col)
+  }
+
+  addIfAvailable(safeRow, safeCol)
+
+  for (let radius = 1; radius <= FIRST_REVEAL_SAFE_RADIUS; radius++) {
+    for (let row = safeRow - radius; row <= safeRow + radius; row++) {
+      for (let col = safeCol - radius; col <= safeCol + radius; col++) {
+        if (Math.max(Math.abs(row - safeRow), Math.abs(col - safeCol)) !== radius) continue
+        addIfAvailable(row, col)
+      }
+    }
+  }
+
+  return safeIndices
+}
+
 export function generateBoard(
   difficulty: Difficulty,
   safeRow: number,
@@ -26,12 +57,13 @@ export function generateBoard(
   const board = createEmptyBoard(difficulty)
 
   const totalCells = difficulty.rows * difficulty.cols
-  const safeIndex = safeRow * difficulty.cols + safeCol
+  const safeIndices = createFirstRevealSafeZone(difficulty, safeRow, safeCol)
+  const targetMines = Math.max(0, Math.min(difficulty.mines, totalCells - safeIndices.size))
 
   const mineIndices = new Set<number>()
-  while (mineIndices.size < difficulty.mines) {
+  while (mineIndices.size < targetMines) {
     const idx = Math.floor(rng() * totalCells)
-    if (idx === safeIndex) continue
+    if (safeIndices.has(idx)) continue
     mineIndices.add(idx)
   }
 

@@ -9,7 +9,7 @@
 
 .inner {
   display: block;
-  width: min(100%, calc(var(--cols, 9) * 44px));
+  width: min(100%, calc(var(--cols, 9) * 60px));
   margin: 0 auto;
   background: var(--google-board-covered-a);
 }
